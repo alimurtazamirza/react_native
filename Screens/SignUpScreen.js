@@ -1,10 +1,8 @@
 import React from 'react';
 import { 
     View, 
-    Text, 
-    Button, 
+    Text,
     TouchableOpacity, 
-    Dimensions,
     TextInput,
     Platform,
     StyleSheet,
@@ -12,7 +10,6 @@ import {
     StatusBar
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
-import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome,Feather} from '@expo/vector-icons';
 
 import GradientButton from "../components/widjets/GradientButton";
@@ -75,14 +72,11 @@ const SignUpScreen = ({navigation}) => {
 
     return (
       <View style={styles.container}>
-          <StatusBar backgroundColor='#e74c3c' barStyle="light-content"/>
+          <StatusBar backgroundColor='#334249' barStyle="light-content"/>
         <View style={styles.header}>
             <Text style={styles.text_header}>Register Now!</Text>
         </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
+        <Animatable.View animation="fadeInUpBig" style={styles.footer} >
             <ScrollView>
             <Text style={styles.text_footer}>Username</Text>
             <View style={styles.action}>
@@ -192,11 +186,11 @@ const SignUpScreen = ({navigation}) => {
                 onClick={()=>{}}
                 Requesting={isRequesting}
                 text="Sign Up"
-                gradient={['#ef9283', '#e74c3c']}
+                gradient={['#848484', '#334249']}
                 />
 
                 <TouchableOpacity
-                    onPress={() => navigation.goBack()}
+                    onPress={() => navigation.navigate('SignIn')}
                     style={[styles.signIn, {
                         borderColor: '#ff7863',
                         borderWidth: 1,
@@ -219,7 +213,7 @@ export default SignUpScreen;
 const styles = StyleSheet.create({
     container: {
       flex: 1, 
-      backgroundColor: '#e74c3c'
+      backgroundColor: '#334249'
     },
     header: {
         flex: 1,
@@ -233,7 +227,12 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         paddingHorizontal: 20,
-        paddingVertical: 30
+        paddingVertical: 30,
+        borderWidth:1,
+        borderTopWidth:7,
+        borderLeftColor:"#e74c3c",
+        borderRightColor:"#e74c3c",
+        borderTopColor:"#e74c3c"
     },
     text_header: {
         color: '#fff',

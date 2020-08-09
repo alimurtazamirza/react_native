@@ -131,7 +131,7 @@ const SignInScreen = ({navigation}) => {
 
     return (
       <View style={styles.container}>
-          <StatusBar backgroundColor='#e74c3c' barStyle="light-content"/>
+          <StatusBar backgroundColor='#334249' barStyle="light-content"/>
         <View style={styles.header}>
             <Text style={styles.text_header}>Welcome!</Text>
         </View>
@@ -223,7 +223,7 @@ const SignInScreen = ({navigation}) => {
             
 
             <TouchableOpacity>
-                <Text style={{color: '#ef9283', marginTop:15}}>Forgot password?</Text>
+                <Text style={{color: '#334249', marginTop:15}}>Forgot password?</Text>
             </TouchableOpacity>
             <View style={styles.button}>
                 
@@ -231,18 +231,18 @@ const SignInScreen = ({navigation}) => {
                 onClick={()=>{loginHandle( data.userEmail, data.userPassword )}}
                 Requesting={isRequesting}
                 text="Sign In"
-                gradient={['#ef9283', '#e74c3c']}
+                gradient={['#848484', '#334249']}
                 />
                 <TouchableOpacity
                     onPress={() => navigation.navigate('SignUp')}
                     style={[styles.signIn, {
-                        borderColor: '#ff7863',
+                        borderColor: "#e74c3c",
                         borderWidth: 1,
                         marginTop: 15
                     }]}
                 >
                     <Text style={[styles.textSign, {
-                        color: '#ff7863'
+                        color: "#e74c3c"
                     }]}>Sign Up</Text>
                 </TouchableOpacity>
             </View>
@@ -256,7 +256,8 @@ export default SignInScreen;
 const styles = StyleSheet.create({
     container: {
       flex: 1, 
-      backgroundColor: '#e74c3c'
+    //   backgroundColor: '#e74c3c'
+      backgroundColor: '#334249'
     },
     header: {
         flex: 1,
@@ -270,7 +271,12 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         paddingHorizontal: 20,
-        paddingVertical: 30
+        paddingVertical: 30,
+        borderWidth:1,
+        borderTopWidth:7,
+        borderLeftColor:"#e74c3c",
+        borderRightColor:"#e74c3c",
+        borderTopColor:"#e74c3c"
     },
     text_header: {
         color: '#fff',
