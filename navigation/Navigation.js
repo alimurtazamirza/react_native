@@ -1,25 +1,36 @@
 import * as React from "react";
-import { View, Alert, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
+// import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { useSelector, useDispatch } from "react-redux";
+import * as Notifications from "expo-notifications";
+import * as Permissions from "expo-permissions";
 
 import Blog from "../Screens/Blog";
 import Search from "../Screens/Search";
 import Notification from "../Screens/Notification";
 import Profile from "../Screens/Profile";
+import User from "../Screens/user/User";
 import Request from "../Screens/Request";
 import Chat from "../Screens/Chat";
+import Badge from "./Badge";
 import BlogDetail from "../Screens/blogs/BlogDetail";
+import BlogNotifications from "../Screens/blogs/BlogNotifications";
+import createBlogScreen from "../Screens/blogs/CreateBlog";
 import Setting from "../Screens/profile/Setting";
 import PersonalSetting from "../Screens/profile/PersonalSetting";
 import AccountSetting from "../Screens/profile/AccountSetting";
+import PhotosSetting from "../Screens/profile/PhotosSetting";
+import ChangePasswordSetting from "../Screens/profile/ChangePasswordSetting";
+import HobbiesSetting from "../Screens/profile/HobbiesSetting";
 import ChatDetail from "../Screens/ChatDetail";
 import Colors from "../constants/Colors";
-import * as SecureStore from "expo-secure-store";
 import { Ionicons, MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { apiChangeAsyncData } from "../redux/action/Notification";
+// import navigation from "../navigation/rootNavigation";
+import UserApi from "../api/User";
 
 const Tab = createBottomTabNavigator();
 
@@ -64,30 +75,27 @@ function BlogScreen({ navigation }) {
     <Stack.Navigator screenOptions={ScreenVar}>
       <Stack.Screen name="Search" component={Search} />
       <Stack.Screen
-        name="Blog"
-        component={Blog}
+        name="User"
         options={{
-          headerRight: () => (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-evenly",
-                width: 60,
-              }}
-            >
-              <MaterialCommunityIcons
-                name="account-search"
-                size={32}
-                color={Colors.accent}
-                onPress={() => {
-                  navigation.navigate("Search");
-                }}
-              />
-            </View>
-          ),
+          headerShown: false,
+          headerTransparent: false,
+          headerTintColor: "black",
+          title: "",
         }}
+        initialParams={{ userID: 0 }}
+        component={User}
       />
-
+      <Stack.Screen
+        name="UserFriend"
+        options={{
+          headerShown: false,
+          headerTransparent: false,
+          headerTintColor: "black",
+          title: "",
+        }}
+        initialParams={{ userID: 0 }}
+        component={User}
+      />
       <Stack.Screen
         name="BlogDetail"
         options={{
@@ -95,25 +103,10 @@ function BlogScreen({ navigation }) {
           headerTransparent: true,
           headerTintColor: "white",
           title: "",
-          headerRight: () => (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-evenly",
-                width: 60,
-              }}
-            >
-              <Ionicons
-                name="ios-heart-empty"
-                size={28}
-                color="white"
-                onPress={() => {}}
-              />
-            </View>
-          ),
         }}
         component={BlogDetail}
       />
+      <Stack.Screen name="userChatDetailScreen" component={ChatDetail} />
     </Stack.Navigator>
   );
 }
@@ -121,6 +114,28 @@ function NotificationScreen() {
   return (
     <Stack.Navigator screenOptions={ScreenVar}>
       <Stack.Screen name="Notification" component={Notification} />
+      <Stack.Screen
+        name="userNotify"
+        options={{
+          headerShown: false,
+          headerTransparent: false,
+          headerTintColor: "black",
+          title: "",
+        }}
+        initialParams={{ userID: 0 }}
+        component={User}
+      />
+      <Stack.Screen
+        name="postNotify"
+        options={{
+          headerShown: true,
+          headerTransparent: true,
+          headerTintColor: "white",
+          title: "",
+        }}
+        component={BlogNotifications}
+      />
+      <Stack.Screen name="userChatDetailScreen" component={ChatDetail} />
     </Stack.Navigator>
   );
 }
@@ -135,7 +150,40 @@ function ProfileScreen() {
           headerTintColor: "black",
           title: "",
         }}
+        // initialParams={{ userID: 0 }}
         component={Profile}
+      />
+      <Stack.Screen
+        name="Blog"
+        component={Blog}
+        options={{ title: "Blogs", headerTitleAlign: "center" }}
+      />
+      <Stack.Screen
+        name="UserFriend"
+        options={{
+          headerShown: false,
+          headerTransparent: false,
+          headerTintColor: "black",
+          title: "",
+        }}
+        initialParams={{ userID: 0 }}
+        component={User}
+      />
+      <Stack.Screen
+        name="createBlog"
+        component={createBlogScreen}
+        options={{ title: "Create", headerTitleAlign: "center" }}
+      />
+
+      <Stack.Screen
+        name="BlogDetail"
+        options={{
+          headerShown: true,
+          headerTransparent: true,
+          headerTintColor: "white",
+          title: "",
+        }}
+        component={BlogDetail}
       />
       <Stack.Screen
         name="SettingScreen"
@@ -167,6 +215,36 @@ function ProfileScreen() {
         }}
         component={AccountSetting}
       />
+      <Stack.Screen
+        name="PhotosScreen"
+        options={{
+          headerShown: true,
+          headerTransparent: true,
+          headerTintColor: "white",
+          title: "Photos Setting",
+        }}
+        component={PhotosSetting}
+      />
+      <Stack.Screen
+        name="ChangePasswordScreen"
+        options={{
+          headerShown: true,
+          headerTransparent: true,
+          headerTintColor: "white",
+          title: "Photos Setting",
+        }}
+        component={ChangePasswordSetting}
+      />
+      <Stack.Screen
+        name="HobbiesScreen"
+        options={{
+          headerShown: true,
+          headerTransparent: true,
+          headerTintColor: "white",
+          title: "Photos Setting",
+        }}
+        component={HobbiesSetting}
+      />
     </Stack.Navigator>
   );
 }
@@ -188,10 +266,51 @@ function ChatScreen() {
 }
 
 function App() {
+  const dispatch = useDispatch();
+  const Auth = useSelector((state) => state.auth);
+  const notify = useSelector((state) => state.notify);
+  React.useEffect(() => {
+    const interval = setInterval(getAsync, 5000);
+    registerForPushNotifications();
+    // Notifications.addNotificationReceivedListener((notifications) =>
+    //   navigation.navigate("Message")
+    // );
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  const registerForPushNotifications = async () => {
+    try {
+      const permission = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+      if (!permission.granted) return;
+
+      const token = await Notifications.getExpoPushTokenAsync();
+      const response = await UserApi.updatePushToken({
+        user_id: Auth.user.id,
+        token: token.data,
+      });
+    } catch (error) {
+      console.log("error getting push notificaiton", error);
+    }
+  };
+
+  const getAsync = async () => {
+    const response = await UserApi.checkAsyncData(Auth.user.id);
+    if (response.ok) {
+      if (
+        (response.data.status != 0 && response.data.massages_count != 0) ||
+        response.data.notifications_count != 0 ||
+        response.data.request_count != 0
+      ) {
+        dispatch(apiChangeAsyncData(response.data));
+      }
+    }
+  };
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Blog"
+        initialRouteName="Profile"
         tabBarOptions={{
           activeTintColor: "white",
           inactiveTintColor: "#b4b4b4",
@@ -221,11 +340,14 @@ function App() {
           options={{
             tabBarLabel: "Notification",
             tabBarIcon: ({ focused, color }) => (
-              <Ionicons
-                name="md-notifications"
-                size={focused == true ? 30 : 26}
-                color={color}
-              />
+              <>
+                <Ionicons
+                  name="md-notifications"
+                  size={focused == true ? 30 : 26}
+                  color={color}
+                />
+                <Badge number={notify.notifications_count} />
+              </>
             ),
           }}
         />
@@ -236,7 +358,7 @@ function App() {
             tabBarLabel: "Profile",
             tabBarIcon: ({ focused, color }) => (
               <MaterialCommunityIcons
-                name="shield-account-outline"
+                name="shield-account"
                 size={focused == true ? 30 : 26}
                 color={color}
               />
@@ -249,11 +371,14 @@ function App() {
           options={{
             tabBarLabel: "Requests",
             tabBarIcon: ({ focused, color }) => (
-              <Entypo
-                name="add-user"
-                size={focused == true ? 30 : 26}
-                color={color}
-              />
+              <>
+                <Ionicons
+                  name="md-person-add"
+                  size={focused == true ? 30 : 26}
+                  color={color}
+                />
+                <Badge number={notify.request_count} />
+              </>
             ),
           }}
         />
@@ -263,11 +388,14 @@ function App() {
           options={{
             tabBarLabel: "Message",
             tabBarIcon: ({ focused, color }) => (
-              <Ionicons
-                name="ios-chatbubbles"
-                size={focused == true ? 30 : 26}
-                color={color}
-              />
+              <>
+                <Ionicons
+                  name="ios-chatbubbles"
+                  size={focused == true ? 30 : 26}
+                  color={color}
+                />
+                <Badge number={notify.massages_count} />
+              </>
             ),
           }}
         />

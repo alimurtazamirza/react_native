@@ -6,9 +6,8 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import ErrorMsg from "./ErrorMsg";
 import Colors from "../../constants/Colors";
 import moment from "moment";
-import { date } from "yup";
 
-function DateElement({ name, labelText }) {
+function DateElement({ name, labelText, margin = 10 }) {
   const { errors, values, setFieldValue, touched } = useFormikContext();
   const [isDatePickerVisible, setDatePickerVisibility] = React.useState(false);
 
@@ -26,7 +25,7 @@ function DateElement({ name, labelText }) {
         style={[
           styles.text_footer,
           {
-            marginTop: 10,
+            marginTop: margin,
           },
         ]}
       >
@@ -43,7 +42,7 @@ function DateElement({ name, labelText }) {
         />
         <IconButton
           icon="calendar"
-          color="#fff"
+          color={Colors.primary}
           size={30}
           onPress={showDatePicker}
           style={styles.iconStyle}
@@ -51,7 +50,7 @@ function DateElement({ name, labelText }) {
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
           mode="date"
-          date={values.dob == "" ? new Date() : new Date(values.dob)}
+          date={values[name] == "" ? new Date() : new Date(values[name])}
           onConfirm={(date) => {
             hideDatePicker();
             let newDate = moment(date).format("YYYY-MM-DD");
@@ -73,15 +72,14 @@ const styles = StyleSheet.create({
   },
   iconStyle: {
     position: "absolute",
-    backgroundColor: Colors.primary,
-    borderRadius: 10,
-    marginHorizontal: 10,
+    marginHorizontal: 5,
     right: -5,
-    bottom: 0,
+    bottom: -5,
   },
   text_footer: {
     color: "#05375a",
-    fontSize: 18,
+    fontSize: 20,
+    fontFamily: "open-sans",
   },
   action: {
     flex: 1,

@@ -1,68 +1,36 @@
-import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
+import React, { useEffect } from "react";
+import { StyleSheet, Text, View, FlatList } from "react-native";
 import StatusBarComponent from "../components/widjets/StatusBarComponent";
 import RequestList from "../components/widjets/RequestList";
-
+import { Feather } from "@expo/vector-icons";
+import { apiChangeAsyncData } from "../redux/action/Notification";
+import { useIsFocused } from "@react-navigation/native";
+import UserApi from "../api/User";
+import { useSelector, useDispatch } from "react-redux";
 import Colors from "../constants/Colors";
 
 const Request = ({ navigation }) => {
-  const DATA = [
-    {
-      id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-      name: "Muhammad Ali",
-      imageUrl: "https://placebeard.it/640x360",
-    },
-    {
-      id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-      name: "ali Murtaza",
-      imageUrl: "https://placebeard.it/620x360",
-    },
-    {
-      id: "58694a0f-3da1-471f-bd96-145571e29d72",
-      name: "Ahmad",
-      imageUrl: "https://placebeard.it/630x360",
-    },
-    {
-      id: "bd7dfcbea-c1b1-46c2-aed5-3ad53abb28ba",
-      name: "Amjad",
-      imageUrl: "https://placebeard.it/660x360",
-    },
-    {
-      id: "3ac68afc-cfds605-48d3-a4f8-fbd91aa97f63",
-      name: "Tasaver",
-      imageUrl: "https://placebeard.it/670x360",
-    },
-    {
-      id: "5869dsfa0f-3dda1-471f-bd96-145571e29d72",
-      name: "Fahad",
-      imageUrl: "https://placebeard.it/680x360",
-    },
-    {
-      id: "bd7acbea-c1bfddf1-46c2-aed5-3dad53abb28ba",
-      name: "Jabran",
-      imageUrl: "https://placebeard.it/690x360",
-    },
-    {
-      id: "3ac68afc-c6df05-d48d3-a4f8-fbd91aa97f63",
-      name: "Hello 1",
-      imageUrl: "https://placebeard.it/60x360",
-    },
-    {
-      id: "5869df4a0f-3da1-471f-bd96-145571e29d72",
-      name: "checker",
-      imageUrl: "https://placebeard.it/520x360",
-    },
-  ];
+  const notify = useSelector((state) => state.notify);
+  const auth = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
+  const DATA = notify.requests;
+
   const renderItem = ({ item }) => (
-    <RequestList name={item.name} imageUrl={item.imageUrl} />
+    <RequestList name={item.name} from={item.from} imageUrl={item.dp} />
   );
+
+  useEffect(() => {
+    if (isFocused) {
+      focusedClicked();
+    }
+  }, [isFocused]);
+  const focusedClicked = async () => {
+    const response = await UserApi.screenFocused("requests", auth.id);
+    if (response.ok) {
+      dispatch(apiChangeAsyncData(response.data));
+    }
+  };
   return (
     <View style={styles.container}>
       <StatusBarComponent theme="dark" />
@@ -86,15 +54,30 @@ const Request = ({ navigation }) => {
             color: "red",
           }}
         >
-          18
+          {DATA.length}
         </Text>
       </View>
       <View>
-        <FlatList
-          data={DATA}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
+        {DATA.length < 1 ? (
+          <View
+            style={{
+              height: "80%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Feather name="frown" size={80} color={Colors.accent} />
+            <Text style={{ color: Colors.accent, fontSize: 30 }}>
+              Nothing Found..!!
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={DATA}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+          />
+        )}
       </View>
     </View>
   );

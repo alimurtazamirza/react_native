@@ -1,13 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   TextInput,
   Platform,
   StyleSheet,
-  ScrollView,
   ImageBackground,
+  Dimensions,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   Headline,
   Subheading,
@@ -15,21 +14,43 @@ import {
   Title,
   Avatar,
   Caption,
+  ActivityIndicator,
 } from "react-native-paper";
-
+import { Ionicons } from "@expo/vector-icons";
+import { WebView } from "react-native-webview";
+import AutoHeightWebView from "react-native-autoheight-webview";
+import { useSelector, useDispatch } from "react-redux";
 import StatusBarComponent from "../../components/widjets/StatusBarComponent";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import BlogApi from "../../api/Blog";
 import Colors from "../../constants/Colors";
+import {
+  apiLikedBlogs,
+  apiCommentBlogs,
+  apiCommentDelete,
+} from "../../redux/action/Blog";
+import moment from "moment";
+import { array } from "yup";
 
 const BlogDetail = (props) => {
-  const title = props.route.params.title;
-  const [data, setData] = React.useState({
-    username: "",
-    password: "",
-    confirm_password: "",
-    check_textInputChange: false,
-    secureTextEntry: true,
-    confirm_secureTextEntry: true,
-  });
+  const { id, dataMaster } = props.route.params;
+  const [text, setText] = useState("");
+  // const [heightWeb, setHeightWeb] = useState(350);
+  const [animating, setAnimating] = useState(false);
+  const dispatch = useDispatch();
+  const blogData = useSelector((state) => state.blog);
+  const { user, profileImages } = useSelector((state) => state.auth);
+  let blog;
+  if (dataMaster == "user") {
+    blog = blogData.user_blog.find((data) => data.id == id);
+  } else if (dataMaster == "account") {
+    blog = blogData.account_blog.find((data) => data.id == id);
+  } else {
+    blog = blogData.blog.find((data) => data.id == id);
+  }
+
+  const [liked, setLiked] = useState(blog.liked);
+
   React.useEffect(() => {
     const parent = props.navigation.dangerouslyGetParent();
     parent.setOptions({
@@ -41,21 +62,112 @@ const BlogDetail = (props) => {
       });
   }, []);
 
-  const [isRequesting, setIsRequesting] = React.useState(false);
-  const textInputChange = (val) => {
-    if (val.length !== 0) {
-      setData({
-        ...data,
-        username: val,
-        check_textInputChange: true,
-      });
+  const onWebViewMessage = (event = WebViewMessageEvent) => {
+    // console.log(event.nativeEvent.data);
+    setHeightWeb(Number(event.nativeEvent.data));
+  };
+
+  const likedBlog = async () => {
+    dispatch(apiLikedBlogs(blog.id, !liked, dataMaster));
+    let likestatus = liked;
+    if (liked) {
+      setLiked(false);
     } else {
-      setData({
-        ...data,
-        username: val,
-        check_textInputChange: false,
-      });
+      setLiked(true);
     }
+    const response = await BlogApi.likeBlog(blog.id, user.id, !likestatus);
+  };
+
+  const addComment = async () => {
+    if (text != "") {
+      setAnimating(true);
+      const response = await BlogApi.commentBlog(blog.id, user.id, text);
+      setAnimating(false);
+      if (!response.ok) {
+        return console.log(response.data);
+      }
+      let result = response.data.data;
+      dispatch(
+        apiCommentBlogs(
+          {
+            blog_id: result.blog_id,
+            created_at: result.created_at,
+            description: result.description,
+            dp: profileImages[0].uri,
+            id: result.id,
+            name: user.name,
+            updated_at: result.updated_at,
+            user_id: user.id,
+          },
+          blog.id,
+          dataMaster
+        )
+      );
+      setText("");
+    }
+  };
+
+  const deleteComment = async (id) => {
+    dispatch(apiCommentDelete(blog.id, id, dataMaster));
+    const response = await BlogApi.deletcomment(id);
+  };
+
+  const renderItem = () => {
+    let i = 0;
+    let arrayObjects = [];
+    for (const iterator of blog.comments_all) {
+      arrayObjects[i] = (
+        <View
+          style={{ flexDirection: "row", marginBottom: 10 }}
+          key={iterator.id}
+        >
+          <Avatar.Image
+            size={40}
+            source={{ uri: iterator.dp }}
+            style={styles.commentAvatar}
+          />
+          <View style={{ flex: 1, flexDirection: "column" }}>
+            <Paragraph style={{ paddingLeft: 4, fontFamily: "open-sans-bold" }}>
+              {iterator.name}
+            </Paragraph>
+
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <Paragraph
+                style={{ paddingLeft: 4, fontFamily: "open-sans", flex: 4 }}
+              >
+                {iterator.description}
+              </Paragraph>
+              <View>
+                {(blog.user_id == user.id || iterator.user_id == user.id) && (
+                  <Ionicons
+                    name="ios-trash"
+                    size={30}
+                    color="red"
+                    style={{ width: 20, flex: 2 }}
+                    onPress={() => deleteComment(iterator.id)}
+                  />
+                )}
+              </View>
+            </View>
+            <View>
+              <Caption>
+                {moment(iterator.created_at).format("DD MMM, YYYY") +
+                  " at " +
+                  moment(iterator.created_at).format("hh:mm a")}
+              </Caption>
+            </View>
+          </View>
+        </View>
+      );
+      i++;
+    }
+    return arrayObjects;
   };
 
   return (
@@ -67,7 +179,7 @@ const BlogDetail = (props) => {
       >
         <View style={styles.container}>
           <ImageBackground
-            source={{ uri: "https://picsum.photos/600" }}
+            source={{ uri: blog.path }}
             style={styles.image}
           ></ImageBackground>
         </View>
@@ -76,15 +188,18 @@ const BlogDetail = (props) => {
         // animation="flipInY"
         style={styles.footer}
       >
-        <ScrollView>
+        <KeyboardAwareScrollView
+          extraScrollHeight={80}
+          style={styles.scrollview}
+        >
           <Headline
             style={{
               fontFamily: "open-sans-bold",
-              fontSize: 35,
+              fontSize: 25,
               paddingTop: 15,
             }}
           >
-            {title}
+            {blog.title}
           </Headline>
           <View
             style={{
@@ -94,16 +209,20 @@ const BlogDetail = (props) => {
             }}
           >
             <Subheading
-              style={{ fontFamily: "open-sans", paddingHorizontal: 2 }}
+              style={{
+                fontFamily: "open-sans",
+                paddingHorizontal: 2,
+                fontSize: 14,
+              }}
             >
-              {" 03 Sep, 2016 "}|{" Dating"}
+              {moment(blog.date).format("DD MMM, YYYY")}|{blog.category}
             </Subheading>
           </View>
           <View>
             <View style={{ flexDirection: "row" }}>
               <Avatar.Image
                 size={50}
-                source={{ uri: "https://placebeard.it/640x360" }}
+                source={{ uri: blog.dp }}
                 style={styles.autherAvatar}
               />
               <Title
@@ -111,46 +230,56 @@ const BlogDetail = (props) => {
                   paddingHorizontal: 10,
                   fontFamily: "open-sans-bold",
                   paddingTop: 7,
+                  fontSize: 16,
                 }}
               >
-                Muhammad Ali
+                {blog.name}
               </Title>
+              <View
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: 10,
+                  width: 30,
+                }}
+              >
+                <Ionicons
+                  name={liked ? "ios-heart" : "ios-heart-empty"}
+                  size={28}
+                  color="red"
+                  onPress={likedBlog}
+                />
+              </View>
             </View>
           </View>
-          <Paragraph
-            style={{
-              fontFamily: "open-sans",
-              fontSize: 15,
-              paddingVertical: 10,
-            }}
-          >
-            But I must explain to you how all this mistaken idea of denouncing
-            pleasure and praising pain was born and I will give you a complete
-            account of the system, and expound the actual teachings of the great
-            explorer of the truth, the master-builder of human happiness. No one
-            rejects, dislikes, or avoids pleasure itself, because it is
-            pleasure, but because those who do not know how to pursue pleasure
-            rationally encounter consequences that are extremely painful.
-          </Paragraph>
-          <Paragraph
-            style={{
-              fontFamily: "open-sans",
-              fontSize: 15,
-              paddingVertical: 10,
-            }}
-          >
-            Nor again is there anyone who loves or pursues or desires to obtain
-            pain of itself, because it is pain, but because occasionally
-            circumstances occur in which toil and pain can procure him some
-            great pleasure. To take a trivial example, which of us ever
-            undertakes laborious physical exercise, except to obtain some
-            advantage from it? But who has any right to find fault with a man
-            who chooses to enjoy a pleasure that has no annoying consequences,
-            or one who avoids a pain that produces no resultant pleasure?"Nor
-            again is there anyone who loves or pursues or desires to obtain pain
-            of itself, because it is pain, except to obtain some advantage from
-            it?
-          </Paragraph>
+          <View style={{ width: "100%", marginTop: 10 }}>
+            {/* <WebView
+              originWhitelist={["*"]}
+              automaticallyAdjustContentInsets={true}
+              style={{ height: heightWeb }}
+              onMessage={onWebViewMessage}
+              injectedJavaScript="window.ReactNativeWebView.postMessage(document.body.scrollHeight)"
+              source={{
+                html:
+                  '<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style type="text/css">body {margin: 0px;padding: 0px;height:200px}</style></head><body>' +
+                  blog.descriptionfull +
+                  "</body></html>",
+              }}
+            /> */}
+            <AutoHeightWebView
+              style={{
+                width: "100%",
+                marginTop: 15,
+                marginBottom: 35,
+                minHeight: 400,
+              }}
+              source={{
+                html: blog.descriptionfull,
+              }}
+              scalesPageToFit={false}
+              viewportContent={"width=device-width, user-scalable=no"}
+            />
+          </View>
           <View
             style={{ flex: 1, flexDirection: "row", justifyContent: "center" }}
           >
@@ -172,122 +301,28 @@ const BlogDetail = (props) => {
               </Subheading>
             </View>
           </View>
-          <View style={{ marginVertical: 20 }}>
-            <View style={{ flexDirection: "row", marginBottom: 10 }}>
-              <Avatar.Image
-                size={40}
-                source={{ uri: "https://placebeard.it/540x360" }}
-                style={styles.commentAvatar}
-              />
-              <View style={{ flex: 1, flexDirection: "column" }}>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Paragraph
-                    style={{ paddingLeft: 4, fontFamily: "open-sans-bold" }}
-                  >
-                    Muhammad Ali
-                  </Paragraph>
-                  <View style={{ paddingHorizontal: 1 }}>
-                    <Caption>Sep 14, 2020 at 11:00 am</Caption>
-                  </View>
-                </View>
-                <Paragraph style={{ paddingLeft: 4, fontFamily: "open-sans" }}>
-                  But I must explain to you how all this mistaken idea of
-                  denouncing pleasure and praising pain was born
-                </Paragraph>
-                {/* <View style={{flexDirection:"row",justifyContent:"flex-end"}}>
-                            <Button icon="reply" mode="text" onPress={() => console.log('Pressed')}>
-                                reply
-                            </Button>
-                        </View> */}
-              </View>
-            </View>
-            <View style={{ flexDirection: "row", marginBottom: 10 }}>
-              <Avatar.Image
-                size={40}
-                source={{ uri: "https://placebeard.it/440x360" }}
-                style={styles.commentAvatar}
-              />
-              <View style={{ flex: 1, flexDirection: "column" }}>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Paragraph
-                    style={{ paddingLeft: 4, fontFamily: "open-sans-bold" }}
-                  >
-                    Muhammad Ali
-                  </Paragraph>
-                  <View style={{ paddingHorizontal: 1 }}>
-                    <Caption>Sep 14, 2020 at 11:00 am</Caption>
-                  </View>
-                </View>
-                <Paragraph style={{ paddingLeft: 4, fontFamily: "open-sans" }}>
-                  expound the actual teachings of the great explorer of the
-                  truth, the master-builder of human happiness..
-                </Paragraph>
-                {/* <View style={{flexDirection:"row",justifyContent:"flex-end"}}>
-                            <Button icon="reply" mode="text" onPress={() => console.log('Pressed')}>
-                                reply
-                            </Button>
-                        </View> */}
-              </View>
-            </View>
-            <View style={{ flexDirection: "row", marginBottom: 10 }}>
-              <Avatar.Image
-                size={40}
-                source={{ uri: "https://placebeard.it/660x360" }}
-                style={styles.commentAvatar}
-              />
-              <View style={{ flex: 1, flexDirection: "column" }}>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Paragraph
-                    style={{ paddingLeft: 4, fontFamily: "open-sans-bold" }}
-                  >
-                    Muhammad Ali
-                  </Paragraph>
-                  <View style={{ paddingHorizontal: 1 }}>
-                    <Caption>Sep 14, 2020 at 11:00 am</Caption>
-                  </View>
-                </View>
-                <Paragraph style={{ paddingLeft: 4, fontFamily: "open-sans" }}>
-                  great explorer of the truth, the master-builder of human
-                  happiness.
-                </Paragraph>
-                {/* <View style={{flexDirection:"row",justifyContent:"flex-end"}}>
-                            <Button icon="reply" mode="text" onPress={() => console.log('Pressed')}>
-                                reply
-                            </Button>
-                        </View> */}
-              </View>
-            </View>
-          </View>
+          <View style={{ marginVertical: 20 }}>{renderItem()}</View>
           <View style={styles.action}>
             <TextInput
               placeholder="Write a Comment"
               style={styles.textInput}
               autoCapitalize="none"
-              onChangeText={(val) => textInputChange(val)}
+              value={text}
+              onChangeText={(val) => setText(val)}
             />
+            <ActivityIndicator size="small" animating={animating} />
             <View>
-              <Ionicons name="md-send" color={Colors.accent} size={30} />
+              {!animating && (
+                <Ionicons
+                  name="md-send"
+                  color={Colors.accent}
+                  size={30}
+                  onPress={addComment}
+                />
+              )}
             </View>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
     </View>
   );
@@ -311,12 +346,15 @@ const styles = StyleSheet.create({
   header: {
     flex: 3,
   },
+  scrollview: {
+    paddingHorizontal: 20,
+    paddingBottom: 50,
+  },
   footer: {
     flex: Platform.OS === "ios" ? 6 : 6,
     backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    paddingHorizontal: 15,
     paddingBottom: 20,
     paddingTop: 3,
     marginTop: -40,

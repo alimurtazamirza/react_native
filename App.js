@@ -1,12 +1,30 @@
-import React, { useState, useEffect } from "react";
-import Navigation from "./navigation/Navigation";
-import AuthNavigation from "./navigation/AuthNavigation";
+import React, { useState } from "react";
 import { DefaultTheme, Provider as PaperProvider } from "react-native-paper";
 
 import * as Font from "expo-font";
 import { AppLoading } from "expo";
-import { AuthContext } from "./components/context";
 import Colors from "./constants/Colors";
+import { createStore, combineReducers, applyMiddleware } from "redux";
+import { Provider } from "react-redux";
+import { composeWithDevTools } from "redux-devtools-extension";
+import SwitchNavigation from "./navigation/SwitchNavigation";
+import UserReducer from "./redux/reducer/User";
+import AuthReducer from "./redux/reducer/Auth";
+import SelectReducer from "./redux/reducer/Select";
+import blogReducer from "./redux/reducer/Blog";
+import notificationReducer from "./redux/reducer/Notification";
+import Storage from "./redux/Storage/";
+// import { navigationRef } from "./navigation/rootNavigation";
+
+const rootReducer = combineReducers({
+  user: UserReducer,
+  auth: AuthReducer,
+  select: SelectReducer,
+  blog: blogReducer,
+  notify: notificationReducer,
+});
+
+const store = createStore(rootReducer, composeWithDevTools());
 
 const theme = {
   ...DefaultTheme,
@@ -18,68 +36,35 @@ const theme = {
   },
 };
 
-const fetchFonts = () => {
-  return Font.loadAsync({
-    "open-sans": require("./constants/fonts/OpenSans-Regular.ttf"),
-    "open-sans-bold": require("./constants/fonts/OpenSans-Bold.ttf"),
-  });
-};
-
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [userToken, setUserToken] = useState(null);
   const [fontLoaded, setFontLoaded] = useState(false);
+  const [storage, setStorage] = useState(null);
 
-  const authContext = React.useMemo(
-    () => ({
-      signIn: () => {
-        setUserToken("fgkj");
-        setIsLoading(false);
-      },
-      signOut: () => {
-        setUserToken(null);
-        setIsLoading(false);
-      },
-      signUp: () => {
-        setUserToken("fgkj");
-        setIsLoading(false);
-      },
-      toggleTheme: () => {
-        setIsDarkTheme((isDarkTheme) => !isDarkTheme);
-      },
-    }),
-    []
-  );
-
-  // if(isLoading){
-  //   return(
-  //     <View style={{flex:1,justifyContent:"center",alignItems:"center"}}>
-  //       <ActivityIndicator size="large" />
-  //     </View>
-  //   );
-  // }
-
-  // useEffect(()=>{
-  //     setTimeout(() => {
-  //       setIsLoading(false);
-  //     }, 1000);
-  // },[]);
+  const BeforeLoad = async () => {
+    const storageUser = await Storage.getAuthUser();
+    setStorage(storageUser);
+    return Font.loadAsync({
+      "open-sans": require("./constants/fonts/OpenSans-Regular.ttf"),
+      "open-sans-bold": require("./constants/fonts/OpenSans-Bold.ttf"),
+    });
+  };
 
   if (!fontLoaded) {
     return (
       <AppLoading
-        startAsync={fetchFonts}
+        startAsync={BeforeLoad}
         onFinish={() => {
           setFontLoaded(true);
         }}
       />
     );
   }
+
   return (
     <PaperProvider theme={theme}>
-      <AuthContext.Provider value={authContext}>
-        {userToken == null ? <Navigation /> : <AuthNavigation />}
-      </AuthContext.Provider>
+      <Provider store={store}>
+        <SwitchNavigation  storageUser={storage} />
+      </Provider>
     </PaperProvider>
   );
 }

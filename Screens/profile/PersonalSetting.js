@@ -1,15 +1,6 @@
-import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Platform,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import React, { useState } from "react";
+import { View, Platform, StyleSheet, Text, Alert } from "react-native";
 import * as Animatable from "react-native-animatable";
-import { FontAwesome, Feather } from "@expo/vector-icons";
 import { Formik } from "formik";
 import * as yup from "yup";
 
@@ -17,8 +8,14 @@ import GradientButton from "../../components/widjets/GradientButton";
 import DateElement from "../../components/widjets/DateElement";
 import TextElement from "../../components/widjets/TextElement";
 import PickerElement from "../../components/widjets/PickerElement";
+import SearchElement from "../../components/widjets/SearchElement";
+import UploadScreen from "../../components/widjets/UploadScreen";
 import StatusBarComponent from "../../components/widjets/StatusBarComponent";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useSelector, useDispatch } from "react-redux";
+import UserApi from "../../api/User";
+import { apiUpdateUser } from "../../redux/action/Auth";
+import Storage from "../../redux/Storage";
 import Colors from "../../constants/Colors";
 
 let validationSchema = yup.object().shape({
@@ -28,10 +25,43 @@ let validationSchema = yup.object().shape({
 });
 
 function PersonalSetting(props) {
-  const [isRequesting, setIsRequesting] = React.useState(false);
+  const dispatch = useDispatch();
+  const [upload, setUpload] = useState(false);
+  const [progress, setProgress] = useState(1);
+  const [isRequesting, setIsRequesting] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+  const selectData = useSelector((state) => state.select);
+
+  const submitForm = async (data) => {
+    setIsRequesting(true);
+    const response = await UserApi.UpdateUser(data);
+    setIsRequesting(false);
+    if (!response.ok) {
+      alert("Something went Wronge..!!");
+      return;
+    }
+    setUpload(true);
+    let { result, success } = response.data;
+    if (success) {
+      dispatch(apiUpdateUser(result));
+      restoreUser(result);
+    }
+  };
+
+  const restoreUser = async (result) => {
+    const storageUser = await Storage.getAuthUser();
+    if (!storageUser) return;
+    let tempUser = JSON.parse(storageUser);
+    Storage.setAuthUser(JSON.stringify({ ...tempUser, user: result }));
+  };
 
   return (
     <View style={styles.container}>
+      <UploadScreen
+        onComplete={() => setUpload(false)}
+        progress={progress}
+        visible={upload}
+      />
       <StatusBarComponent theme="light" backgound="transparent" />
       <View style={styles.header}></View>
       <Animatable.View
@@ -39,51 +69,74 @@ function PersonalSetting(props) {
         duration={800}
         style={styles.footer}
       >
-        <KeyboardAwareScrollView extraScrollHeight={80}>
+        <KeyboardAwareScrollView
+          extraScrollHeight={80}
+          style={styles.scrollview}
+        >
           <Formik
             initialValues={{
-              gender: "",
-              dob: "",
-              location: "",
-              phone: "",
-              looking: "",
-              marial_status: "",
-              political: "",
-              religion: "",
-              desc: "",
-              facebook: "",
-              instagram: "",
-              twitter: "",
-              youtube: "",
+              id: user.id,
+              name: user.name,
+              gender: user.gender,
+              dob: user.dob,
+              location: user.location,
+              phone: user.phone,
+              latlong: user.latlong,
+              state: user.state,
+              city: user.city,
+              education: user.education,
+              country: user.country,
+              country_code: user.country_code,
+              looking: user.looking,
+              drinker: user.drinker,
+              ethnicity: user.ethnicity,
+              height: user.height,
+              language_spoken: user.language_spoken,
+              preffered_age: user.preffered_age,
+              purpose: user.purpose,
+              looking: user.looking,
+              smoker: user.smoker,
+              marial_status: user.marial_status,
+              religion: user.religion,
+              occupation: user.occupation,
+              desc: user.desc,
+              facebook: user.facebook,
+              instagram: user.instagram,
+              twitter: user.twitter,
+              youtube: user.youtube,
             }}
-            onSubmit={(values) => console.log(values)}
+            // enableReinitialize
+            onSubmit={submitForm}
             validationSchema={validationSchema}
           >
-            {({
-              handleChange,
-              handleSubmit,
-              errors,
-              values,
-              setFieldTouched,
-              setFieldValue,
-              touched,
-            }) => (
+            {({ handleSubmit }) => (
               <>
+                <TextElement
+                  name="name"
+                  labelText="Name"
+                  iconName="user-o"
+                  placeholderText="Your Name"
+                />
                 <PickerElement
                   name="gender"
                   labelText="Gender"
-                  pickerData={[
-                    { label: "Male", value: "Male" },
-                    { label: "Female", value: "Femle" },
-                  ]}
+                  pickerData={selectData.gender}
                 />
                 <DateElement name="dob" labelText="Date of Birth" />
-                <TextElement
-                  name="location"
-                  labelText="Location"
-                  iconName="user-o"
-                  placeholderText="You location"
-                />
+                <>
+                  <SearchElement
+                    name="location"
+                    labelText="Address"
+                    iconName="address-card-o"
+                    icon={true}
+                    margin={20}
+                    placeholderText="Your Address"
+                  />
+                  <Text style={{ color: "grey", fontSize: 12 }}>
+                    Click the map Search Icon after filling the text to choose
+                    the distination
+                  </Text>
+                </>
                 <TextElement
                   name="phone"
                   labelText="Phone No"
@@ -93,57 +146,63 @@ function PersonalSetting(props) {
                 <PickerElement
                   name="looking"
                   labelText="Wish to meet"
-                  pickerData={[
-                    { label: "Male", value: "Male" },
-                    { label: "Female", value: "Femle" },
-                  ]}
+                  pickerData={selectData.looking}
+                />
+                <PickerElement
+                  name="drinker"
+                  labelText="Drinker"
+                  pickerData={selectData.drinker}
+                />
+                <PickerElement
+                  name="ethnicity"
+                  labelText="Ethnicity"
+                  pickerData={selectData.ethnicity}
+                />
+                <PickerElement
+                  name="height"
+                  labelText="Height"
+                  pickerData={selectData.height}
                 />
                 <PickerElement
                   name="occupation"
                   labelText="Occupation"
-                  pickerData={[
-                    { label: "No Answer", value: "No Answer" },
-                    { label: "Employed", value: "Employed" },
-                    { label: "Self-employed", value: "Self-employed" },
-                    { label: "Currently not employed", value: "Femle" },
-                  ]}
+                  pickerData={selectData.occupation}
+                />
+                <PickerElement
+                  name="language_spoken"
+                  labelText="Languages spoken"
+                  pickerData={selectData.language_spoken}
+                />
+                <PickerElement
+                  name="preffered_age"
+                  labelText="Preferred age"
+                  pickerData={selectData.preffered_age}
+                />
+                <PickerElement
+                  name="purpose"
+                  labelText="Purpose of dating"
+                  pickerData={selectData.purpose}
+                />
+                <PickerElement
+                  name="smoker"
+                  labelText="Smoker"
+                  pickerData={selectData.smoker}
                 />
                 <PickerElement
                   name="marial_status"
-                  labelText="Martial Status"
-                  pickerData={[
-                    { label: "No Answer", value: "No Answer" },
-                    { label: "Single", value: "Single" },
-                    {
-                      label: "Divorced / Separated",
-                      value: "Divorced / Separated",
-                    },
-                    { label: "Widowed", value: "Widowed" },
-                    {
-                      label: "It is Complicated",
-                      value: "It is Complicated",
-                    },
-                  ]}
-                />
-                <TextElement
-                  name="political"
-                  labelText="Political Incline"
-                  iconName="object-group"
-                  placeholderText="Political Incline"
+                  labelText="Relationship"
+                  pickerData={selectData.marial_status}
                 />
                 <PickerElement
                   name="religion"
                   labelText="Religious Beliefs"
-                  pickerData={[
-                    { label: "No Answer", value: "No Answer" },
-                    { label: "Islam", value: "Islam" },
-                    {
-                      label: "Christian",
-                      value: "Christian",
-                    },
-                    { label: "Athiest", value: "Athiest" },
-                    { label: "Jew", value: "Jew" },
-                  ]}
+                  pickerData={selectData.religion}
+                />
+                <TextElement
+                  name="education"
+                  labelText="Final Education"
+                  iconName="object-group"
+                  placeholderText="Final Education"
                 />
                 <TextElement
                   name="desc"
@@ -151,41 +210,38 @@ function PersonalSetting(props) {
                   iconName="object-group"
                   placeholderText="Description"
                   multiline={true}
+                  numberOfLines={5}
                 />
                 <TextElement
                   name="facebook"
                   labelText="Facebook Link"
                   iconName="object-group"
                   placeholderText="Complete Facebook profile link"
-                  multiline={true}
                 />
                 <TextElement
                   name="instagram"
                   labelText="Instagram Link"
                   iconName="object-group"
                   placeholderText="Complete Instagram profile link"
-                  multiline={true}
                 />
                 <TextElement
                   name="twitter"
                   labelText="Twitter Link"
                   iconName="object-group"
                   placeholderText="Complete Twitter profile link"
-                  multiline={true}
                 />
                 <TextElement
                   name="youtube"
                   labelText="Youtube Link"
                   iconName="object-group"
                   placeholderText="Complete Youtube profile link"
-                  multiline={true}
                 />
 
                 <View style={styles.button}>
                   <GradientButton
                     onClick={handleSubmit}
                     Requesting={isRequesting}
-                    text="Sign Up"
+                    text="Update"
                     gradient={["#848484", "#334249"]}
                   />
                 </View>
@@ -214,8 +270,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingBottom: 20,
+    paddingTop: 5,
     borderWidth: 1,
     borderTopWidth: 7,
     borderLeftColor: "#e74c3c",
@@ -238,6 +294,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
     paddingBottom: 5,
+  },
+  scrollview: {
+    paddingHorizontal: 20,
+    paddingBottom: 50,
   },
   dropdown: {
     flex: 1,

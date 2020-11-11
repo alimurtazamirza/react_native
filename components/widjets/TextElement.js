@@ -10,28 +10,37 @@ function TextElement({
   labelText,
   iconName,
   placeholderText,
+  icon = false,
+  margin = 10,
   ...otherProps
 }) {
-  const { errors, handleChange, setFieldTouched, touched } = useFormikContext();
+  const {
+    errors,
+    handleChange,
+    values,
+    setFieldTouched,
+    touched,
+  } = useFormikContext();
   return (
     <View>
       <Text
         style={[
           styles.text_footer,
           {
-            marginTop: 10,
+            marginTop: margin,
           },
         ]}
       >
         {labelText}
       </Text>
       <View style={styles.action}>
-        {/* <FontAwesome name={iconName} color="#05375a" size={20} /> */}
+        {icon && <FontAwesome name={iconName} color="#05375a" size={20} />}
         <TextInput
           placeholder={placeholderText}
           style={styles.textInput}
           autoCapitalize="none"
           onChangeText={handleChange(name)}
+          value={values[name]}
           onBlur={() => setFieldTouched(name)}
           {...otherProps}
         />
@@ -54,10 +63,10 @@ function TextElement({
 const styles = StyleSheet.create({
   text_footer: {
     color: "#05375a",
-    fontSize: 18,
+    fontSize: 20,
+    fontFamily: "open-sans",
   },
   action: {
-    flex: 1,
     flexDirection: "row",
     marginTop: 10,
     borderBottomWidth: 1,

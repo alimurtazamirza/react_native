@@ -1,87 +1,107 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
-  TextInput,
   Platform,
   StyleSheet,
   ScrollView,
   ImageBackground,
   Dimensions,
 } from "react-native";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  Divider,
-  IconButton,
-  Subheading,
-  Paragraph,
-  Title,
-  Avatar,
-  Caption,
-  List,
-} from "react-native-paper";
+import { Feather } from "@expo/vector-icons";
+import { IconButton, Avatar, List } from "react-native-paper";
 
 import StatusBarComponent from "../../components/widjets/StatusBarComponent";
 import Colors from "../../constants/Colors";
+import * as ImagePicker from "expo-image-picker";
+import PhotosApi from "../../api/Photos";
+import UploadScreen from "../../components/widjets/UploadScreen";
+import { apiProfileChange } from "../../redux/action/Auth";
+import Storage from "../../redux/Storage";
+import { useSelector, useDispatch } from "react-redux";
 
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
 
 const BlogDetail = (props) => {
-  // const title = props.route.params.title;
-  React.useEffect(() => {
+  const dispatch = useDispatch();
+  const [upload, setUpload] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const { profileImages, user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
     const parent = props.navigation.dangerouslyGetParent();
     parent.setOptions({
       tabBarVisible: false,
     });
+    requestPermission();
     return () =>
       parent.setOptions({
         tabBarVisible: true,
       });
   }, []);
 
-  const [data, setData] = React.useState({
-    username: "",
-    password: "",
-    confirm_password: "",
-    check_textInputChange: false,
-    secureTextEntry: true,
-    confirm_secureTextEntry: true,
-  });
-  const [isRequesting, setIsRequesting] = React.useState(false);
+  const requestPermission = async () => {
+    const { granted } = await ImagePicker.requestCameraRollPermissionsAsync();
+    if (!granted) alert("You need to enable permission to access the Gallery");
+  };
 
-  const textInputChange = (val) => {
-    if (val.length !== 0) {
-      setData({
-        ...data,
-        username: val,
-        check_textInputChange: true,
+  const onchangeImage = async (type, uri) => {
+    setProgress(0);
+    setUpload(true);
+
+    const response = await PhotosApi.addProfilePhoto(
+      { user_id: user.id, image: uri, type: type },
+      (progress) => setProgress(progress)
+    );
+
+    // console.log(response.data.profile_images);
+    if (!response.ok) {
+      setUpload(false);
+      return alert("Something Went Wronge.!!");
+    }
+    dispatch(apiProfileChange(response.data.profile_images));
+    restoreUser(response.data.profile_images);
+  };
+
+  const restoreUser = async (result) => {
+    const storageUser = await Storage.getAuthUser();
+    if (!storageUser) return;
+    let tempUser = JSON.parse(storageUser);
+    Storage.setAuthUser(JSON.stringify({ ...tempUser, profileImages: result }));
+  };
+
+  const SelectImage = async (type) => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.7,
       });
-    } else {
-      setData({
-        ...data,
-        username: val,
-        check_textInputChange: false,
-      });
+      if (!result.cancelled) onchangeImage(type, result.uri);
+    } catch (error) {
+      console.log("Error reading an image", error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <StatusBarComponent theme="dark" backgound="transparent" />
-      <View
-        // animation="flipInX"
-        style={styles.header}
-      >
+      <UploadScreen
+        onComplete={() => setUpload(false)}
+        progress={progress}
+        visible={upload}
+      />
+      {/* <StatusBarComponent theme="dark" backgound="transparent" /> */}
+      <StatusBarComponent theme="light" backgound="transparent" />
+      <View style={styles.header}>
         <View style={styles.container}>
           <ImageBackground
-            source={{ uri: "https://picsum.photos/700" }}
+            source={{ uri: profileImages[1].uri }}
             style={styles.image}
           >
             <IconButton
               icon="camera"
               color="black"
               size={25}
-              onPress={() => console.log("Pressed")}
+              onPress={() => SelectImage("cover_pic")}
               style={{
                 backgroundColor: "#e3e5ed",
                 position: "absolute",
@@ -106,7 +126,7 @@ const BlogDetail = (props) => {
               >
                 <Avatar.Image
                   size={windowWidth / 3}
-                  source={{ uri: "https://placebeard.it/640x360" }}
+                  source={{ uri: profileImages[0].uri }}
                   style={{ backgroundColor: Colors.background }}
                 />
                 <View>
@@ -114,7 +134,7 @@ const BlogDetail = (props) => {
                     icon="account-edit"
                     color="black"
                     size={25}
-                    onPress={() => console.log("Pressed")}
+                    onPress={() => SelectImage("dp")}
                     style={{
                       position: "absolute",
                       right: windowWidth / 3 / 3.5,
@@ -146,7 +166,6 @@ const BlogDetail = (props) => {
                     icon="square-edit-outline"
                     color="#0b84ed"
                     size={30}
-                    onPress={() => console.log("Pressed")}
                     style={{
                       backgroundColor: "#e3e5ed",
                       borderRadius: 15,
@@ -164,7 +183,7 @@ const BlogDetail = (props) => {
                 )}
               />
               {/* <Divider style={{height:1,marginHorizontal:20}}/> */}
-              <List.Item
+              {/* <List.Item
                 title="Account Setting"
                 onPress={() => {
                   props.navigation.navigate("AccountScreen");
@@ -175,7 +194,6 @@ const BlogDetail = (props) => {
                     icon="settings"
                     color="#C13584"
                     size={30}
-                    onPress={() => console.log("Pressed")}
                     style={{
                       backgroundColor: "#f9eaeb",
                       borderRadius: 15,
@@ -191,17 +209,18 @@ const BlogDetail = (props) => {
                     style={{ marginHorizontal: 10, marginTop: 15 }}
                   />
                 )}
-              />
+              /> */}
               <List.Item
                 title="Change Password"
-                onPress={() => {}}
+                onPress={() => {
+                  props.navigation.navigate("ChangePasswordScreen");
+                }}
                 titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
                 left={() => (
                   <IconButton
                     icon="textbox-password"
                     color="#1DA1F2"
                     size={30}
-                    onPress={() => console.log("Pressed")}
                     style={{
                       backgroundColor: "#dbecf9",
                       borderRadius: 15,
@@ -220,14 +239,15 @@ const BlogDetail = (props) => {
               />
               <List.Item
                 title="Hobbies and Interests"
-                onPress={() => {}}
+                onPress={() => {
+                  props.navigation.navigate("HobbiesScreen");
+                }}
                 titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
                 left={() => (
                   <IconButton
                     icon="google-fit"
                     color="#FF0000"
                     size={30}
-                    onPress={() => console.log("Pressed")}
                     style={{
                       backgroundColor: "#f7dcdc",
                       borderRadius: 15,
@@ -246,42 +266,17 @@ const BlogDetail = (props) => {
               />
               <List.Item
                 title="Photos"
-                onPress={() => {}}
+                onPress={() => {
+                  props.navigation.navigate("PhotosScreen");
+                }}
                 titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
                 left={() => (
                   <IconButton
                     icon="image-filter"
                     color="#dbad23"
                     size={30}
-                    onPress={() => console.log("Pressed")}
                     style={{
                       backgroundColor: "#f4eedc",
-                      borderRadius: 15,
-                      marginHorizontal: 10,
-                    }}
-                  />
-                )}
-                right={() => (
-                  <Feather
-                    name="chevron-right"
-                    size={30}
-                    color="black"
-                    style={{ marginHorizontal: 10, marginTop: 15 }}
-                  />
-                )}
-              />
-              <List.Item
-                title="Education / Employment"
-                onPress={() => {}}
-                titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
-                left={() => (
-                  <IconButton
-                    icon="account-card-details"
-                    color="#e74c3c"
-                    size={30}
-                    onPress={() => console.log("Pressed")}
-                    style={{
-                      backgroundColor: "#f7e0de",
                       borderRadius: 15,
                       marginHorizontal: 10,
                     }}

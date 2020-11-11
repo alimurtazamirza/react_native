@@ -19,7 +19,20 @@ function RequestList(props) {
           title={props.name}
           description={props.text + "\n" + date}
           descriptionNumberOfLines={3}
-          onPress={() => {}}
+          onPress={() => {
+            if (props.type == "profile" || props.type == "friend") {
+              props.navigate("userNotify", { userID: props.from });
+            }
+            if (props.type == "comment") {
+              let arrySplit = props.url.split("/");
+              if (typeof arrySplit[2] != "undefined") {
+                props.navigate("postNotify", {
+                  id: props.to,
+                  blog_id: arrySplit[2],
+                });
+              }
+            }
+          }}
           titleStyle={{
             fontSize: 16,
             fontFamily: "open-sans-bold",

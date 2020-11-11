@@ -1,100 +1,83 @@
-import React from 'react';
-import { View, Text, Image, Button,StyleSheet,Dimensions,Modal} from 'react-native';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  Button,
+  StyleSheet,
+  Dimensions,
+  FlatList,
+  YellowBox,
+} from "react-native";
 import ImageView from "react-native-image-viewing";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { useSelector } from "react-redux";
 
-const windowHeight = Dimensions.get('window').height;
-const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get("window").height;
+const windowWidth = Dimensions.get("window").width;
 
-const images = [
-    {
-        uri: "https://images.unsplash.com/photo-1571501679680-de32f1e7aad4"
-    },
-    {
-        uri: 'https://avatars2.githubusercontent.com/u/7970947?v=3&s=460'
-    },
-    {
-        uri: "https://images.unsplash.com/photo-1573273787173-0eb81a833b34"
-    },
-    {
-        uri: "https://images.unsplash.com/photo-1569569970363-df7b6160d111"
+YellowBox.ignoreWarnings([
+  "VirtualizedLists should never be nested", // TODO: Remove when fixed
+]);
+
+const Photos = (props) => {
+  const { imageUris } = props.userObj
+    ? useSelector((state) => state.user)
+    : useSelector((state) => state.auth);
+  // const { imageUris } = useSelector((state) => state.auth);
+  const [visible, setIsVisible] = useState({ shown: false, index: 0 });
+  const [source, setSource] = useState([]);
+  useState(() => {
+    let arrayImages = [];
+    let i = 0;
+    for (const iterator of imageUris) {
+      arrayImages[i] = { uri: iterator.path };
+      i++;
     }
-];
-
-
-
-const Photos = () => {
-    const [visible, setIsVisible] = React.useState(false);
-    // const [backClor, setBackClor] = React.useState("rgba(0, 0, 0, 0.1)");
-    const changestatus = (val) => {      
-        // if(val==true){
-        //     setBackClor("black");
-        // }else{
-        //     setBackClor("rgba(0, 0, 0, 0.1)");
-        // }
-        setIsVisible(val);
-        console.log("this is clicked");
-    }
-    
-
+    setSource(arrayImages);
+  }, [imageUris]);
+  const renderItem = ({ item, index }) => {
     return (
-        <View>
-             <ImageView
-                images={images}
-                imageIndex={0}
-                visible={visible}
-                swipeToCloseEnabled={false}
-                presentationStyle="overFullScreen"
-                onRequestClose={() => setIsVisible(false)}
-             />
-            <View style={{flex:1,flexDirection:"row",justifyContent:"flex-start",marginVertical:5}}>
-                <Image
-                    style={styles.galleryPics}
-                    source={{ uri: 'https://picsum.photos/700' }}
-                />
-                
-                <Image
-                    style={styles.galleryPics}
-                    source={{ uri: 'https://picsum.photos/700' }}
-                />
-                <Image
-                    style={styles.galleryPics}
-                    source={{ uri: 'https://picsum.photos/700' }}
-                />
-            </View>
-            <View style={{flex:1,flexDirection:"row",justifyContent:"flex-start",marginVertical:5}}>
-                <Image
-                    style={styles.galleryPics}
-                    source={{ uri: 'https://picsum.photos/700' }}
-                />
-                <Image
-                    style={styles.galleryPics}
-                    source={{ uri: 'https://picsum.photos/700' }}
-                />
-                <Image
-                    style={styles.galleryPics}
-                    source={{ uri: 'https://picsum.photos/700' }}
-                />
-            </View>
-            <View style={{flex:1,flexDirection:"row",justifyContent:"flex-start",marginVertical:5}}>
-                <Image
-                    style={styles.galleryPics}
-                    source={{ uri: 'https://picsum.photos/700' }}
-                />
-                <Image
-                    style={styles.galleryPics}
-                    source={{ uri: 'https://picsum.photos/700' }}
-                />
-            </View>
-            <Button title="button" onPress={()=>{changestatus(true)}} />
-        </View>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          setIsVisible({ ...visible, shown: true, index: index });
+        }}
+        key={index}
+      >
+        <Image style={styles.galleryPics} source={{ uri: item.uri }} />
+      </TouchableWithoutFeedback>
     );
+  };
+
+  return (
+    <View>
+      <ImageView
+        images={source}
+        imageIndex={visible.index}
+        visible={visible.shown}
+        swipeToCloseEnabled={false}
+        presentationStyle="overFullScreen"
+        onRequestClose={() => setIsVisible({ ...visible, shown: false })}
+      />
+      <View style={{ flex: 1 }}>
+        <FlatList
+          data={source}
+          renderItem={renderItem}
+          scrollEnabled={false}
+          keyExtractor={(item, index) => index}
+          numColumns={3}
+        />
+      </View>
+    </View>
+  );
 };
 const styles = StyleSheet.create({
-    galleryPics:{
-        width:windowWidth/3.5,
-        height:windowWidth/3.5,
-        marginHorizontal:3.5,
-        borderRadius:10
-      },
+  galleryPics: {
+    width: windowWidth / 3.5,
+    height: windowWidth / 3.5,
+    marginHorizontal: 3.5,
+    borderRadius: 10,
+    marginVertical: 5,
+  },
 });
 export default Photos;

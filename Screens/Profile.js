@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   TouchableOpacity,
@@ -6,18 +6,20 @@ import {
   StyleSheet,
   ScrollView,
   ImageBackground,
+  Alert,
   Dimensions,
-  Image,
 } from "react-native";
-import { Ionicons, Feather } from "@expo/vector-icons";
-import GradientButton from "../components/widjets/GradientButton";
+import { Feather } from "@expo/vector-icons";
 import StatusBarComponent from "../components/widjets/StatusBarComponent";
+import * as Linking from "expo-linking";
+import LoadingScreen from "../components/widjets/LoadingScreen";
 import {
   Headline,
   Subheading,
   Divider,
   Title,
   Avatar,
+  Button,
   Caption,
   IconButton,
   Text,
@@ -26,15 +28,71 @@ import {
 } from "react-native-paper";
 import BottomSheet from "reanimated-bottom-sheet";
 import Animated from "react-native-reanimated";
+import { useSelector, useDispatch } from "react-redux";
+// import { apiLoadUser } from "../redux/action/User";
+import { apiLoginUser, apiLoadUser } from "../redux/action/Auth";
+import { apiGetSelect } from "../redux/action/Select";
+import Storage from "../redux/Storage";
+import { apiChangeAsyncData } from "../redux/action/Notification";
 
-import Switch from "./profile/Switch";
+import Switch from "./Switch";
+import UserApi from "../api/User";
 import Colors from "../constants/Colors";
 
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
 
-const Profile = ({ navigation }) => {
-  const [value, setValue] = React.useState("About");
+const Profile = ({ route, navigation }) => {
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth);
+  const notify = useSelector((state) => state.notify);
+  const [value, setValue] = useState("About");
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    // LoadUser();
+    LoadDataFirst();
+    LoadSelect();
+  }, []);
+
+  const LoadUser = async () => {
+    const response = await UserApi.getUser();
+    if (response.ok && response.data.user != null) {
+      dispatch(
+        apiLoadUser({
+          profileImages: response.data.profile_images,
+          imageUris: response.data.images,
+          user: response.data.user,
+        })
+      );
+      if (error) setError(false);
+    } else {
+      setError(true);
+    }
+    // setLoading(false);
+  };
+
+  const LoadDataFirst = async () => {
+    const response = await UserApi.dataFirst(user.user.id);
+    if (response.ok) {
+      dispatch(apiChangeAsyncData(response.data));
+    }
+  };
+
+  const navigationFunction = (screen, params) => {
+    navigation.navigate(screen, params);
+  };
+
+  const LoadSelect = async () => {
+    const response = await UserApi.loadSelect();
+    if (response.ok) {
+      dispatch(apiGetSelect(response.data));
+    } else {
+      console.log("Error ");
+    }
+  };
+
   const toggleButtonChanger = (value) => {
     if (value) {
       setValue(value);
@@ -47,6 +105,27 @@ const Profile = ({ navigation }) => {
   const renderContent = () => (
     <View style={styles.panel}>
       <List.Section>
+        <TouchableOpacity
+          onPress={() => {
+            bs.current.snapTo(1);
+            navigation.navigate("Blog");
+          }}
+        >
+          <List.Item
+            title="Posts"
+            description="Check what other's are thinking about."
+            titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
+            left={() => (
+              <Feather
+                name="book-open"
+                size={30}
+                style={{ marginHorizontal: 10, marginVertical: 7 }}
+                color="black"
+              />
+            )}
+          />
+        </TouchableOpacity>
+        <Divider style={{ height: 1, marginHorizontal: 20 }} />
         <TouchableOpacity
           onPress={() => {
             navigationScreen();
@@ -66,7 +145,7 @@ const Profile = ({ navigation }) => {
             )}
           />
         </TouchableOpacity>
-        <Divider style={{ height: 1, marginHorizontal: 20 }} />
+        {/* <Divider style={{ height: 1, marginHorizontal: 20 }} />
         <TouchableOpacity>
           <List.Item
             title="Block User"
@@ -75,6 +154,34 @@ const Profile = ({ navigation }) => {
             left={() => (
               <Feather
                 name="user-x"
+                size={30}
+                color="black"
+                style={{ marginHorizontal: 10, marginVertical: 7 }}
+              />
+            )}
+          />
+        </TouchableOpacity> */}
+        <Divider style={{ height: 1, marginHorizontal: 20 }} />
+        <TouchableOpacity
+          onPress={() => {
+            dispatch(
+              apiLoginUser({
+                profileImages: [],
+                imageUris: [],
+                user: null,
+                token: "",
+              })
+            );
+            Storage.RemoveAuthUser();
+          }}
+        >
+          <List.Item
+            title="Log Out"
+            description="Log out of the application."
+            titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
+            left={() => (
+              <Feather
+                name="log-out"
                 size={30}
                 color="black"
                 style={{ marginHorizontal: 10, marginVertical: 7 }}
@@ -94,12 +201,27 @@ const Profile = ({ navigation }) => {
   );
   let bs = React.createRef();
   let fall = new Animated.Value(1);
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ fontFamily: "open-sans-bold" }}>
+          Couldn't retrive the Data.
+        </Text>
+        <Button mode="contained" onPress={LoadUser}>
+          Retry
+        </Button>
+      </View>
+    );
+  }
+  if (loading) {
+    return <LoadingScreen visible={loading} />;
+  }
   return (
     <View style={styles.container}>
-      <StatusBarComponent theme="dark" backgound="transparent" />
+      <StatusBarComponent theme="light" backgound="transparent" />
       <BottomSheet
         ref={bs}
-        snapPoints={[windowHeight / 3.5, 0]}
+        snapPoints={[windowHeight / 2.9, 0]}
         initialSnap={1}
         callbackNode={fall}
         enabledContentGestureInteraction={true}
@@ -107,18 +229,22 @@ const Profile = ({ navigation }) => {
         renderContent={renderContent}
         renderHeader={renderHeader}
       />
-      <ScrollView>
-        <View
+      <ScrollView nestedScrollEnabled={true}>
+        <Animated.View
           // animation="flipInX"
           style={styles.header}
         >
           <View style={styles.container}>
             <ImageBackground
-              source={{ uri: "https://picsum.photos/700" }}
+              source={
+                user.profileImages[1].uri == ""
+                  ? null
+                  : { uri: user.profileImages[1].uri }
+              }
               style={styles.image}
             ></ImageBackground>
           </View>
-        </View>
+        </Animated.View>
         <View style={styles.footer}>
           <View
             style={{
@@ -134,7 +260,11 @@ const Profile = ({ navigation }) => {
             >
               <Avatar.Image
                 size={windowWidth / 2.3}
-                source={{ uri: "https://placebeard.it/640x360" }}
+                source={
+                  user.profileImages[0].uri == ""
+                    ? null
+                    : { uri: user.profileImages[0].uri }
+                }
                 style={{ backgroundColor: Colors.background }}
               />
             </View>
@@ -143,9 +273,10 @@ const Profile = ({ navigation }) => {
                 fontFamily: "open-sans-bold",
                 fontSize: 34,
                 paddingTop: 15,
+                textTransform: "capitalize",
               }}
             >
-              Muhammad Ali
+              {user.user.name}
             </Headline>
             <View
               style={{
@@ -157,7 +288,8 @@ const Profile = ({ navigation }) => {
               <Subheading
                 style={{ fontFamily: "open-sans", paddingHorizontal: 2 }}
               >
-                {" 26 years Old "}|{" Fance, Paris"}
+                {user.user.age + " years Old "}|
+                {user.user.state + ", " + user.user.country}
               </Subheading>
             </View>
             <View
@@ -171,7 +303,20 @@ const Profile = ({ navigation }) => {
                 icon="facebook"
                 color="#0b84ed"
                 size={30}
-                onPress={() => console.log("Pressed")}
+                onPress={async () => {
+                  if (user.user.facebook) {
+                    const supported = await Linking.canOpenURL(
+                      user.user.facebook
+                    );
+                    if (supported) {
+                      await Linking.openURL(user.user.facebook);
+                    } else {
+                      Alert.alert(
+                        `Don't know how to open this URL: ${user.user.facebook}`
+                      );
+                    }
+                  }
+                }}
                 style={{
                   backgroundColor: "#e3e5ed",
                   borderRadius: 15,
@@ -182,7 +327,20 @@ const Profile = ({ navigation }) => {
                 icon="instagram"
                 color="#C13584"
                 size={30}
-                onPress={() => console.log("Pressed")}
+                onPress={async () => {
+                  if (user.user.instagram) {
+                    const supported = await Linking.canOpenURL(
+                      user.user.instagram
+                    );
+                    if (supported) {
+                      await Linking.openURL(user.user.instagram);
+                    } else {
+                      Alert.alert(
+                        `Don't know how to open this URL: ${user.user.instagram}`
+                      );
+                    }
+                  }
+                }}
                 style={{
                   backgroundColor: "#f9eaeb",
                   borderRadius: 15,
@@ -193,7 +351,20 @@ const Profile = ({ navigation }) => {
                 icon="twitter"
                 color="#1DA1F2"
                 size={30}
-                onPress={() => console.log("Pressed")}
+                onPress={async () => {
+                  if (user.user.twitter) {
+                    const supported = await Linking.canOpenURL(
+                      user.user.twitter
+                    );
+                    if (supported) {
+                      await Linking.openURL(user.user.twitter);
+                    } else {
+                      Alert.alert(
+                        `Don't know how to open this URL: ${user.user.twitter}`
+                      );
+                    }
+                  }
+                }}
                 style={{
                   backgroundColor: "#e3e5ed",
                   borderRadius: 15,
@@ -204,7 +375,20 @@ const Profile = ({ navigation }) => {
                 icon="youtube"
                 color="#FF0000"
                 size={30}
-                onPress={() => console.log("Pressed")}
+                onPress={async () => {
+                  if (user.user.youtube) {
+                    const supported = await Linking.canOpenURL(
+                      user.user.youtube
+                    );
+                    if (supported) {
+                      await Linking.openURL(user.user.youtube);
+                    } else {
+                      Alert.alert(
+                        `Don't know how to open this URL: ${user.user.youtube}`
+                      );
+                    }
+                  }
+                }}
                 style={{
                   backgroundColor: "#f9eaeb",
                   borderRadius: 15,
@@ -230,7 +414,7 @@ const Profile = ({ navigation }) => {
                   fontSize: 35,
                 }}
               >
-                10
+                {notify.posts}
               </Title>
               <Caption style={{ fontFamily: "open-sans", fontSize: 20 }}>
                 Posts
@@ -246,7 +430,7 @@ const Profile = ({ navigation }) => {
                   fontSize: 35,
                 }}
               >
-                35
+                {notify.friends}
               </Title>
               <Caption style={{ fontFamily: "open-sans", fontSize: 20 }}>
                 Friends
@@ -262,7 +446,7 @@ const Profile = ({ navigation }) => {
                   fontSize: 35,
                 }}
               >
-                80
+                {notify.likes}
               </Title>
               <Caption style={{ fontFamily: "open-sans", fontSize: 20 }}>
                 Likes
@@ -290,12 +474,13 @@ const Profile = ({ navigation }) => {
               marginVertical: 10,
             }}
           >
-            <View style={{ flex: 1, paddingHorizontal: 5 }}>
+            {/* <View style={{ flex: 1, paddingHorizontal: 5 }}>
               <GradientButton
                 onClick={() => {}}
                 Requesting={false}
                 text="Add Friend"
                 gradient={["#ef8575", Colors.accent]}
+                on
               />
             </View>
             <View style={{ flex: 1, paddingHorizontal: 5 }}>
@@ -320,7 +505,7 @@ const Profile = ({ navigation }) => {
                   Message
                 </Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
           </View>
           <View
             style={{
@@ -361,7 +546,11 @@ const Profile = ({ navigation }) => {
             </ToggleButton.Row>
           </View>
           <View style={{ marginVertical: 20 }}>
-            <Switch currentState={value} />
+            <Switch
+              currentState={value}
+              onNavigation={navigationFunction}
+              user={false}
+            />
           </View>
         </View>
       </ScrollView>

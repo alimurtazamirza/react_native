@@ -1,15 +1,28 @@
 import React from "react";
-import { Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import Colors from "../../constants/Colors";
 
-const GradientButton = (props) => {
+const GradientButton = ({ onClick, Requesting, height, text }) => {
   return (
     <TouchableOpacity
-      onPress={props.onClick}
-      disabled={props.Requesting}
-      style={[styles.signIn, { height: props.height > 0 ? props.height : 50 }]}
+      onPress={onClick}
+      disabled={Requesting}
+      style={[styles.signIn, { height: height > 0 ? height : 50 }]}
     >
-      <Text style={styles.textSign}>{props.text}</Text>
+      {!Requesting ? (
+        <Text style={styles.textSign}>{text}</Text>
+      ) : (
+        <ActivityIndicator
+          animating={Requesting}
+          color={Colors.accent}
+          size="large"
+        />
+      )}
     </TouchableOpacity>
   );
 };

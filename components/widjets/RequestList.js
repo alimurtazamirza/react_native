@@ -1,13 +1,65 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View, Dimensions } from "react-native";
 import { Divider, Avatar } from "react-native-paper";
 import GradientButton from "./GradientButton";
 import OutlinedButton from "./OutlinedButton";
+import { useSelector, useDispatch } from "react-redux";
+import { apiChangeAsyncData } from "../../redux/action/Notification";
+import UserApi from "../../api/User";
 import Colors from "../../constants/Colors";
 
 const { width, height } = Dimensions.get("window");
 
 function RequestList(props) {
+  const dispatch = useDispatch();
+  const AuthUser = useSelector((state) => state.auth.user);
+  const [requesting, setRequesting] = useState(false);
+  const [requesting2, setRequesting2] = useState(false);
+
+  const requestBtn = async (option) => {
+    if (option == "accept") {
+      setRequesting(true);
+      const response = await UserApi.acceptRequest({
+        id: props.from,
+        user_id: AuthUser.id,
+      });
+      if (response.ok) {
+        if (response.data.status == 1) {
+          LoadDataFirst("1");
+        }
+      }
+      setRequesting(false);
+    } else if (option == "cancel") {
+      setRequesting2(true);
+      const response = await UserApi.rejectRequest({
+        id: props.from,
+        user_id: AuthUser.id,
+      });
+      if (response.ok) {
+        if (response.data.status == 1) {
+          LoadDataFirst("2");
+        }
+      }
+      setRequesting2(false);
+    } else {
+    }
+  };
+
+  const LoadDataFirst = async (option) => {
+    let response;
+    if (option == "1") {
+      setRequesting(true);
+      response = await UserApi.dataFirst(AuthUser.id);
+      setRequesting(false);
+    } else {
+      setRequesting2(true);
+      response = await UserApi.dataFirst(AuthUser.id);
+      setRequesting2(false);
+    }
+    if (response.ok) {
+      dispatch(apiChangeAsyncData(response.data));
+    }
+  };
   return (
     <>
       <View
@@ -42,8 +94,10 @@ function RequestList(props) {
               }}
             >
               <GradientButton
-                onClick={() => {}}
-                Requesting={false}
+                onClick={() => {
+                  requestBtn("accept");
+                }}
+                Requesting={requesting}
                 text="Confirm"
                 gradient={["#ef8575", Colors.accent]}
                 height={40}
@@ -51,8 +105,10 @@ function RequestList(props) {
             </View>
             <View style={{ width: width * 0.35, paddingRight: 5 }}>
               <OutlinedButton
-                onClick={() => {}}
-                Requesting={false}
+                onClick={() => {
+                  requestBtn("cancel");
+                }}
+                Requesting={requesting2}
                 text="Remove"
                 height={40}
               />

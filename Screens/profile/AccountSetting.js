@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Platform, StyleSheet, ScrollView } from "react-native";
 import * as Animatable from "react-native-animatable";
-import { FontAwesome, Feather } from "@expo/vector-icons";
-import RNPickerSelect from "react-native-picker-select";
+import { useSelector, useDispatch } from "react-redux";
 import { Formik } from "formik";
 import * as yup from "yup";
 
 import GradientButton from "../../components/widjets/GradientButton";
 import StatusBarComponent from "../../components/widjets/StatusBarComponent";
+import PickerElement from "../../components/widjets/PickerElement";
+import UploadScreen from "../../components/widjets/UploadScreen";
+import Storage from "../../redux/Storage";
+import UserApi from "../../api/User";
+import { apiUpdateUser } from "../../redux/action/Auth";
 import ErrorMsg from "../../components/widjets/ErrorMsg";
 
 let validationSchema = yup.object().shape({
@@ -16,10 +20,42 @@ let validationSchema = yup.object().shape({
   see_images: yup.string().required().label("Images"),
 });
 function PersonalSetting({ navigation }) {
-  const [isRequesting, setIsRequesting] = React.useState(false);
+  const dispatch = useDispatch();
+  const [upload, setUpload] = useState(false);
+  const [progress, setProgress] = useState(1);
+  const [isRequesting, setIsRequesting] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+
+  const submitForm = async (data) => {
+    setIsRequesting(true);
+    const response = await UserApi.UpdateUser(data);
+    setIsRequesting(false);
+    if (!response.ok) {
+      alert("Something went Wronge..!!");
+      return;
+    }
+    setUpload(true);
+    let { result, success } = response.data;
+    if (success) {
+      dispatch(apiUpdateUser(result));
+      restoreUser(result);
+    }
+  };
+
+  const restoreUser = async (result) => {
+    const storageUser = await Storage.getAuthUser();
+    if (!storageUser) return;
+    let tempUser = JSON.parse(storageUser);
+    Storage.setAuthUser(JSON.stringify({ ...tempUser, user: result }));
+  };
 
   return (
     <View style={styles.container}>
+      <UploadScreen
+        onComplete={() => setUpload(false)}
+        progress={progress}
+        visible={upload}
+      />
       <StatusBarComponent theme="light" backgound="transparent" />
       <View style={styles.header}></View>
       <Animatable.View
@@ -30,11 +66,13 @@ function PersonalSetting({ navigation }) {
         <ScrollView>
           <Formik
             initialValues={{
-              see_profile: "1",
-              see_friends: "1",
-              see_images: "1",
+              id: user.id,
+              see_profile: user.see_profile,
+              see_friends: user.see_friends,
+              see_images: user.see_images,
+              language: user.language,
             }}
-            onSubmit={(values) => console.log(values)}
+            onSubmit={submitForm}
             validationSchema={validationSchema}
           >
             {({
@@ -46,113 +84,51 @@ function PersonalSetting({ navigation }) {
               touched,
             }) => (
               <>
-                <Text
-                  style={[
-                    styles.text_footer,
-                    {
-                      marginTop: 15,
-                    },
+                <PickerElement
+                  name="see_profile"
+                  labelText="Who can see my profile"
+                  pickerData={[
+                    { label: "Everyone", value: 1 },
+                    { label: "No one", value: 2 },
+                    { label: "Only Friends", value: 3 },
+                    { label: "Subscribed Members", value: 4 },
                   ]}
-                >
-                  Who can see my profile
-                </Text>
-                <View
-                  style={{ borderBottomWidth: 1, borderBottomColor: "#e0e0e0" }}
-                >
-                  <RNPickerSelect
-                    style={{ ...pickerSelectStyles }}
-                    placeholder={{
-                      label: "Select an Item",
-                      value: "",
-                    }}
-                    value={values.see_profile}
-                    onOpen={() => setFieldTouched("see_profile")}
-                    onValueChange={handleChange("see_profile")}
-                    items={[
-                      { label: "Everyone", value: "1" },
-                      { label: "No one", value: "2" },
-                      { label: "Only Friends", value: "3" },
-                      { label: "Subscribed Members", value: "4" },
-                    ]}
-                  />
-                </View>
-                <ErrorMsg
-                  error={errors.see_profile}
-                  visible={touched.see_profile}
                 />
-                <Text
-                  style={[
-                    styles.text_footer,
-                    {
-                      marginTop: 15,
-                    },
+                <PickerElement
+                  name="see_friends"
+                  labelText="Who can see my Friends"
+                  pickerData={[
+                    { label: "Everyone", value: 1 },
+                    { label: "No one", value: 2 },
+                    { label: "Only Friends", value: 3 },
+                    { label: "Subscribed Members", value: 4 },
                   ]}
-                >
-                  Who can see my Friends
-                </Text>
-                <View
-                  style={{ borderBottomWidth: 1, borderBottomColor: "#e0e0e0" }}
-                >
-                  <RNPickerSelect
-                    style={{ ...pickerSelectStyles }}
-                    placeholder={{
-                      label: "Select an Item",
-                      value: "",
-                    }}
-                    value={values.see_friends}
-                    onValueChange={handleChange("see_friends")}
-                    onOpen={() => setFieldTouched("see_friends")}
-                    items={[
-                      { label: "Everyone", value: "1" },
-                      { label: "No one", value: "2" },
-                      { label: "Only Friends", value: "3" },
-                      { label: "Subscribed Members", value: "4" },
-                    ]}
-                  />
-                </View>
-                <ErrorMsg
-                  error={errors.see_friends}
-                  visible={touched.see_friends}
                 />
-                <Text
-                  style={[
-                    styles.text_footer,
-                    {
-                      marginTop: 15,
-                    },
+                <PickerElement
+                  name="see_images"
+                  labelText="Who can see my Images"
+                  pickerData={[
+                    { label: "Everyone", value: 1 },
+                    { label: "No one", value: 2 },
+                    { label: "Only Friends", value: 3 },
+                    { label: "Subscribed Members", value: 4 },
                   ]}
-                >
-                  Who can see my Images
-                </Text>
-                <View
-                  style={{ borderBottomWidth: 1, borderBottomColor: "#e0e0e0" }}
-                >
-                  <RNPickerSelect
-                    style={{ ...pickerSelectStyles }}
-                    placeholder={{
-                      label: "Select an Item",
-                      value: "",
-                    }}
-                    value={values.see_images}
-                    onValueChange={handleChange("see_images")}
-                    onOpen={() => setFieldTouched("see_images")}
-                    items={[
-                      { label: "Everyone", value: "1" },
-                      { label: "No one", value: "2" },
-                      { label: "Only Friends", value: "3" },
-                      { label: "Subscribed Members", value: "4" },
-                    ]}
-                  />
-                </View>
-                <ErrorMsg
-                  error={errors.see_images}
-                  visible={touched.see_images}
+                />
+                <PickerElement
+                  name="language"
+                  labelText="Language"
+                  pickerData={[
+                    { label: "English", value: 1 },
+                    { label: "German", value: 2 },
+                    { label: "Franch", value: 3 },
+                    { label: "Pakistani", value: 4 },
+                  ]}
                 />
                 <View style={styles.button}>
                   <GradientButton
                     onClick={handleSubmit}
                     Requesting={isRequesting}
-                    text="Sign Up"
+                    text="Update"
                     gradient={["#848484", "#334249"]}
                   />
                 </View>

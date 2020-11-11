@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,27 +6,50 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { FAB } from "react-native-paper";
-import StatusBarComponent from "../components/widjets/StatusBarComponent";
 import { Divider, Searchbar, List, Avatar } from "react-native-paper";
 import KeyboardDismiss from "../components/widjets/KeyboardDismiss";
+import { useIsFocused } from "@react-navigation/native";
+import { useSelector, useDispatch } from "react-redux";
+import { Feather } from "@expo/vector-icons";
+import { apiChangeAsyncData } from "../redux/action/Notification";
+import Badge from "../navigation/Badge";
+import UserApi from "../api/User";
 import Colors from "../constants/Colors";
+import moment from "moment";
 
 const Chat = (props) => {
+  const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = React.useState("");
+  const isFocused = useIsFocused();
+  const notify = useSelector((state) => state.notify);
+  const auth = useSelector((state) => state.auth.user);
+  const onChangeSearch = (query) => {
+    setSearchQuery(query);
+    filterLists();
+  };
 
-  const onChangeSearch = (query) => setSearchQuery(query);
+  useEffect(() => {
+    if (isFocused) {
+      focusedClicked();
+    }
+  }, [isFocused, notify.massages]);
 
+  const focusedClicked = async () => {
+    const response = await UserApi.screenFocused("massages", auth.id);
+    if (response.ok) {
+      dispatch(apiChangeAsyncData(response.data));
+    }
+  };
+
+  const filterLists = () => {
+    notify.massages.filter((msg) => msg.name == searchQuery);
+  };
+  const filteredContacts = notify.massages.filter((contacts) =>
+    contacts.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   return (
     <KeyboardDismiss>
       <View style={styles.container}>
-        <FAB
-          style={styles.fab}
-          large
-          icon="pen-plus"
-          color="white"
-          onPress={() => console.log("Pressed")}
-        />
         <View>
           <Searchbar
             placeholder="Search"
@@ -34,113 +57,79 @@ const Chat = (props) => {
             value={searchQuery}
             style={{ marginTop: 5 }}
           />
-
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <List.Section>
-              <List.Item
-                title="User Four"
-                descriptionNumberOfLines={2}
-                description="hye there whats you doing?"
-                onPress={() => {
-                  props.navigation.navigate("ChatDetailScreen", {
-                    itemId: 84,
-                    title: "User Four",
-                  });
-                }}
-                titleStyle={{
-                  fontSize: 16,
-                  fontFamily: "open-sans-bold",
-                  color: Colors.accent,
-                }}
-                descriptionStyle={{
-                  fontSize: 14,
-                  color: Colors.primary,
-                  fontFamily: "open-sans",
-                }}
-                left={() => (
-                  <Avatar.Image
-                    size={60}
-                    source={{ uri: "https://picsum.photos/700" }}
-                    style={styles.autherAvatar}
-                  />
-                )}
-                right={() => (
-                  <View style={{ marginRight: 3, marginTop: 13 }}>
-                    <Text>8/09/2020</Text>
-                  </View>
-                )}
-              />
-              {/* <Divider style={{ height: 1, marginHorizontal: 20 }} /> */}
-              <List.Item
-                title="Hello user"
-                descriptionNumberOfLines={2}
-                description="Item description and this is not the end it will move forward and we will see what we have to do"
-                onPress={() => {
-                  props.navigation.navigate("ChatDetailScreen", {
-                    itemId: 86,
-                    title: "Hello user",
-                  });
-                }}
-                titleStyle={{
-                  fontSize: 16,
-                  fontFamily: "open-sans-bold",
-                  color: Colors.accent,
-                }}
-                descriptionStyle={{
-                  fontSize: 14,
-                  color: Colors.primary,
-                  fontFamily: "open-sans",
-                }}
-                left={() => (
-                  <Avatar.Image
-                    size={60}
-                    source={{ uri: "https://picsum.photos/700" }}
-                    style={styles.autherAvatar}
-                  />
-                )}
-                right={() => (
-                  <View style={{ marginRight: 3, marginTop: 13 }}>
-                    <Text>8/09/2020</Text>
-                  </View>
-                )}
-              />
-              {/* <Divider style={{ height: 1, marginHorizontal: 20 }} /> */}
-              <List.Item
-                title="Ali murtaza"
-                description="Hello does my message was recieved??"
-                descriptionNumberOfLines={2}
-                onPress={() => {
-                  props.navigation.navigate("ChatDetailScreen", {
-                    itemId: 83,
-                    title: "Ali Murtaza",
-                  });
-                }}
-                titleStyle={{
-                  fontSize: 16,
-                  fontFamily: "open-sans-bold",
-                  color: Colors.accent,
-                }}
-                descriptionStyle={{
-                  fontSize: 14,
-                  color: Colors.primary,
-                  fontFamily: "open-sans",
-                }}
-                left={() => (
-                  <Avatar.Image
-                    size={60}
-                    source={{ uri: "https://picsum.photos/700" }}
-                    style={styles.autherAvatar}
-                  />
-                )}
-                right={() => (
-                  <View style={{ marginRight: 3, marginTop: 13 }}>
-                    <Text>8/09/2020</Text>
-                  </View>
-                )}
-              />
-              {/* <Divider style={{ height: 1, marginHorizontal: 20 }} /> */}
-            </List.Section>
-          </TouchableWithoutFeedback>
+          {filteredContacts.length < 1 ? (
+            <View
+              style={{
+                height: "80%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Feather name="frown" size={80} color={Colors.accent} />
+              <Text style={{ color: Colors.accent, fontSize: 30 }}>
+                Nothing Found..!!
+              </Text>
+            </View>
+          ) : (
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <List.Section>
+                {filteredContacts.map((item, index) => {
+                  let otherUser;
+                  let splitArray = item.header.split("_");
+                  if (splitArray[0] == auth.id) {
+                    otherUser = splitArray[1];
+                  } else {
+                    otherUser = splitArray[0];
+                  }
+                  return (
+                    <View key={index}>
+                      <List.Item
+                        title={item.name}
+                        descriptionNumberOfLines={2}
+                        description={item.message}
+                        onPress={() => {
+                          props.navigation.navigate("ChatDetailScreen", {
+                            itemId: otherUser,
+                            title: item.name,
+                            header: item.header,
+                            dp: item.dp,
+                          });
+                        }}
+                        titleStyle={{
+                          fontSize: 16,
+                          fontFamily: "open-sans-bold",
+                          color: Colors.accent,
+                        }}
+                        descriptionStyle={{
+                          fontSize: 14,
+                          color: Colors.primary,
+                          fontFamily: "open-sans",
+                        }}
+                        left={() => (
+                          <View>
+                            <Avatar.Image
+                              size={60}
+                              source={{ uri: item.dp }}
+                              style={styles.autherAvatar}
+                            />
+                            <Badge number={item.chatMassages} />
+                          </View>
+                        )}
+                        right={() => (
+                          <View style={{ marginRight: 3, marginTop: 13 }}>
+                            <Text>
+                              {moment(item.created_at).format("DD MMM, YYYY")}
+                            </Text>
+                          </View>
+                        )}
+                      />
+                      <Divider style={{ height: 1, marginHorizontal: 20 }} />
+                    </View>
+                  );
+                })}
+              </List.Section>
+            </TouchableWithoutFeedback>
+          )}
         </View>
       </View>
     </KeyboardDismiss>
