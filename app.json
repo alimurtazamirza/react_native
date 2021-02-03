@@ -16,8 +16,8 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.truelysuccessfull.lovesetgo",
-      "buildNumber":"1.0.0"
+      "bundleIdentifier": "com.trulysuccessive.lovesetgo",
+      "buildNumber":"1.0.1"
     },
     "web": {
       "favicon": "./assets/favicon.png"

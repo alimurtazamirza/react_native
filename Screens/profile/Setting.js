@@ -291,6 +291,33 @@ const BlogDetail = (props) => {
                   />
                 )}
               />
+              <List.Item
+                title="Packages"
+                onPress={() => {
+                  props.navigation.navigate("ChangePackageScreen");
+                }}
+                titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
+                left={() => (
+                  <IconButton
+                    icon="package-variant"
+                    color="#57963f"
+                    size={30}
+                    style={{
+                      backgroundColor: "#dff2d7",
+                      borderRadius: 15,
+                      marginHorizontal: 10,
+                    }}
+                  />
+                )}
+                right={() => (
+                  <Feather
+                    name="chevron-right"
+                    size={30}
+                    color="black"
+                    style={{ marginHorizontal: 10, marginTop: 15 }}
+                  />
+                )}
+              />
             </List.Section>
           </View>
         </ScrollView>

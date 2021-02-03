@@ -23,6 +23,7 @@ import PersonalSetting from "../Screens/profile/PersonalSetting";
 import AccountSetting from "../Screens/profile/AccountSetting";
 import PhotosSetting from "../Screens/profile/PhotosSetting";
 import ChangePasswordSetting from "../Screens/profile/ChangePasswordSetting";
+import PackageSetting from "../Screens/profile/PackageSetting";
 import HobbiesSetting from "../Screens/profile/HobbiesSetting";
 import ChatDetail from "../Screens/ChatDetail";
 import Colors from "../constants/Colors";
@@ -236,6 +237,16 @@ function ProfileScreen() {
         component={ChangePasswordSetting}
       />
       <Stack.Screen
+        name="ChangePackageScreen"
+        options={{
+          headerShown: true,
+          headerTransparent: true,
+          headerTintColor: "white",
+          title: "Photos Setting",
+        }}
+        component={PackageSetting}
+      />
+      <Stack.Screen
         name="HobbiesScreen"
         options={{
           headerShown: true,
@@ -270,7 +281,7 @@ function App() {
   const Auth = useSelector((state) => state.auth);
   const notify = useSelector((state) => state.notify);
   React.useEffect(() => {
-    const interval = setInterval(getAsync, 5000);
+    const interval = setInterval(getAsync, 20000);
     registerForPushNotifications();
     // Notifications.addNotificationReceivedListener((notifications) =>
     //   navigation.navigate("Message")
