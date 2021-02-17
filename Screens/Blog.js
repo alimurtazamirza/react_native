@@ -22,6 +22,7 @@ const Blog = ({ navigation }) => {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blog);
   const { user } = useSelector((state) => state.auth);
+  const locale = useSelector((state) => state.translation);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -39,7 +40,7 @@ const Blog = ({ navigation }) => {
       setError(false);
     }
     if (!response.data.data.length)
-      return alert("Sorry, no post for this category found..!!");
+      return alert(locale.post_sorry);
     dispatch(
       apiGetBlogs({
         blog: response.data.data,
@@ -97,7 +98,7 @@ const Blog = ({ navigation }) => {
       <Card.Content style={{ paddingLeft: 5 }}>
         <Title style={{ fontFamily: "open-sans-bold" }}>{item.title}</Title>
         <Subheading style={{ fontFamily: "open-sans" }}>
-          {"By " + item.name.split(" ", 1) + " "}|
+          {locale.by+" "+ item.name.split(" ", 1) + " "}|
           {moment(item.created_at).format("DD MMM, YYYY")}|
           {"" + item.category + ""}
         </Subheading>
@@ -119,7 +120,7 @@ const Blog = ({ navigation }) => {
               fontFamily: "open-sans-bold",
             }}
           >
-            Read more {`>>`}
+            {locale.read_more} {`>>`}
           </Button>
         </View>
       </Card.Content>
@@ -130,10 +131,10 @@ const Blog = ({ navigation }) => {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontFamily: "open-sans-bold" }}>
-          Couldn't retrive the Data.
+        {locale.couldnt_retrive}
         </Text>
         <Button mode="contained" onPress={LoadBlogs}>
-          Retry
+        {locale.retry}
         </Button>
       </View>
     );
@@ -157,7 +158,7 @@ const Blog = ({ navigation }) => {
               paddingTop: 10,
             }}
           >
-            Top Categories
+            {locale.top_categories}
           </Subheading>
         </View>
         <ScrollView horizontal={true}>
@@ -170,7 +171,7 @@ const Blog = ({ navigation }) => {
               }
               onPress={() => LoadBlogs("all")}
             >
-              All
+              {locale.all}
             </Chip>
             <Chip
               icon="account-multiple-plus"
@@ -183,7 +184,7 @@ const Blog = ({ navigation }) => {
               }
               onPress={() => LoadBlogs("Marriage")}
             >
-              Marriage
+              {locale.marriage}
             </Chip>
             <Chip
               icon="bank"
@@ -195,7 +196,7 @@ const Blog = ({ navigation }) => {
               }
               onPress={() => LoadBlogs("Business")}
             >
-              Business
+              {locale.business}
             </Chip>
             <Chip
               icon="calendar-heart"
@@ -207,7 +208,7 @@ const Blog = ({ navigation }) => {
               }
               onPress={() => LoadBlogs("Dating")}
             >
-              Dating
+              {locale.dating}
             </Chip>
             <Chip
               icon="account-heart"
@@ -219,7 +220,7 @@ const Blog = ({ navigation }) => {
               }
               onPress={() => LoadBlogs("Love")}
             >
-              Love
+              {locale.love}
             </Chip>
             <Chip
               icon="wallet-travel"
@@ -231,7 +232,7 @@ const Blog = ({ navigation }) => {
               }
               onPress={() => LoadBlogs("Travel")}
             >
-              Travel
+              {locale.travel}
             </Chip>
             <Chip
               icon="account-multiple"
@@ -243,7 +244,7 @@ const Blog = ({ navigation }) => {
               }
               onPress={() => LoadBlogs("Friend")}
             >
-              Friend
+              {locale.friend}
             </Chip>
             <Chip
               icon="clover"
@@ -255,7 +256,7 @@ const Blog = ({ navigation }) => {
               }
               onPress={() => LoadBlogs("Technology")}
             >
-              Technology
+              {locale.technology}
             </Chip>
             <Chip
               icon="camera"
@@ -267,7 +268,7 @@ const Blog = ({ navigation }) => {
               }
               onPress={() => LoadBlogs("Photography")}
             >
-              Photography
+              {locale.photograpy}
             </Chip>
           </View>
         </ScrollView>
@@ -279,7 +280,7 @@ const Blog = ({ navigation }) => {
               paddingVertical: 15,
             }}
           >
-            New Posts
+            {locale.new_post}
           </Subheading>
         </View>
 

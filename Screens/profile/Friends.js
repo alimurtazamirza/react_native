@@ -21,6 +21,7 @@ const Friends = (props) => {
   const [friends, setFriends] = useState([]);
   const [ischeck, setIsCheck] = useState(true);
   const AuthUser = useSelector((state) => state.auth.user);
+  const locale = useSelector((state) => state.translation);
 
   useEffect(() => {
     LoadFriends();
@@ -62,10 +63,10 @@ const Friends = (props) => {
                   </View>
                   <View style={styles.descriptStyle}>
                     <Text numberOfLines={2} style={styles.cardDescription}>
-                      {friend.age + " years Old"}
+                      {friend.age + " "+locale.years_old}
                     </Text>
                     <Text numberOfLines={2} style={styles.cardDescription}>
-                      {" | from " + friend.state == ""
+                      {" | "+locale.from+ " " + friend.state == ""
                         ? friend.city
                         : friend.state}
                     </Text>
@@ -105,7 +106,7 @@ const Friends = (props) => {
                             },
                           ]}
                         >
-                          View profile
+                          {locale.view_profile}
                         </Text>
                       </TouchableOpacity>
                     </View>

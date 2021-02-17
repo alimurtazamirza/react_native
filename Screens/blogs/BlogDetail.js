@@ -39,6 +39,7 @@ const BlogDetail = (props) => {
   const [animating, setAnimating] = useState(false);
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blog);
+  const locale = useSelector((state) => state.translation);
   const { user, profileImages } = useSelector((state) => state.auth);
   let blog;
   if (dataMaster == "user") {
@@ -297,14 +298,14 @@ const BlogDetail = (props) => {
               <Subheading
                 style={{ fontFamily: "open-sans-bold", color: "white" }}
               >
-                Comments
+                {locale.comments}
               </Subheading>
             </View>
           </View>
           <View style={{ marginVertical: 20 }}>{renderItem()}</View>
           <View style={styles.action}>
             <TextInput
-              placeholder="Write a Comment"
+              placeholder={locale.write_comment}
               style={styles.textInput}
               autoCapitalize="none"
               value={text}

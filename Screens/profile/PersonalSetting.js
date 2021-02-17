@@ -16,7 +16,6 @@ import { useSelector, useDispatch } from "react-redux";
 import UserApi from "../../api/User";
 import { apiUpdateUser } from "../../redux/action/Auth";
 import Storage from "../../redux/Storage";
-import Colors from "../../constants/Colors";
 
 let validationSchema = yup.object().shape({
   gender: yup.string().required().label("Gender"),
@@ -31,17 +30,19 @@ function PersonalSetting(props) {
   const [isRequesting, setIsRequesting] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const selectData = useSelector((state) => state.select);
+  const locale = useSelector((state) => state.translation);
+
 
   const submitForm = async (data) => {
     setIsRequesting(true);
     const response = await UserApi.UpdateUser(data);
     setIsRequesting(false);
     if (!response.ok) {
-      alert("Something went Wronge..!!");
+      alert(locale.error_somthing_went_wronge);
       return;
     }
     setUpload(true);
-    let { result, success } = response.data;
+    let { result, success} = response.data;
     if (success) {
       dispatch(apiUpdateUser(result));
       restoreUser(result);
@@ -113,135 +114,134 @@ function PersonalSetting(props) {
               <>
                 <TextElement
                   name="name"
-                  labelText="Name"
+                  labelText={locale.name}
                   iconName="user-o"
-                  placeholderText="Your Name"
+                  placeholderText={locale.name}
                 />
                 <PickerElement
                   name="gender"
-                  labelText="Gender"
+                  labelText={locale.gender}
                   pickerData={selectData.gender}
                 />
-                <DateElement name="dob" labelText="Date of Birth" />
+                <DateElement name="dob" labelText={locale.dob} />
                 <>
                   <SearchElement
                     name="location"
-                    labelText="Address"
+                    labelText={locale.address}
                     iconName="address-card-o"
                     icon={true}
                     margin={20}
-                    placeholderText="Your Address"
+                    placeholderText={locale.your_address}
                   />
                   <Text style={{ color: "grey", fontSize: 12 }}>
-                    Click the map Search Icon after filling the text to choose
-                    the distination
+                  {locale.map_search}
                   </Text>
                 </>
                 <TextElement
                   name="phone"
-                  labelText="Phone No"
+                  labelText={locale.phone}
                   iconName="phone"
-                  placeholderText="Phone No"
+                  placeholderText={locale.phone}
                 />
                 <PickerElement
                   name="looking"
-                  labelText="Wish to meet"
+                  labelText={locale.wish_to_meet}
                   pickerData={selectData.looking}
                 />
                 <PickerElement
                   name="drinker"
-                  labelText="Drinker"
+                  labelText={locale.drinker}
                   pickerData={selectData.drinker}
                 />
                 <PickerElement
                   name="ethnicity"
-                  labelText="Ethnicity"
+                  labelText={locale.ethnicity}
                   pickerData={selectData.ethnicity}
                 />
                 <PickerElement
                   name="height"
-                  labelText="Height"
+                  labelText={locale.height}
                   pickerData={selectData.height}
                 />
                 <PickerElement
                   name="occupation"
-                  labelText="Occupation"
+                  labelText={locale.occupation}
                   pickerData={selectData.occupation}
                 />
                 <PickerElement
                   name="language_spoken"
-                  labelText="Languages spoken"
+                  labelText={locale.language}
                   pickerData={selectData.language_spoken}
                 />
                 <PickerElement
                   name="preffered_age"
-                  labelText="Preferred age"
+                  labelText={locale.preffered_age}
                   pickerData={selectData.preffered_age}
                 />
                 <PickerElement
                   name="purpose"
-                  labelText="Purpose of dating"
+                  labelText={locale.purpose}
                   pickerData={selectData.purpose}
                 />
                 <PickerElement
                   name="smoker"
-                  labelText="Smoker"
+                  labelText={locale.smoker}
                   pickerData={selectData.smoker}
                 />
                 <PickerElement
                   name="marial_status"
-                  labelText="Relationship"
+                  labelText={locale.relationship}
                   pickerData={selectData.marial_status}
                 />
                 <PickerElement
                   name="religion"
-                  labelText="Religious Beliefs"
+                  labelText={locale.religion}
                   pickerData={selectData.religion}
                 />
                 <TextElement
                   name="education"
-                  labelText="Final Education"
+                  labelText={locale.final_education}
                   iconName="object-group"
-                  placeholderText="Final Education"
+                  placeholderText={locale.final_education}
                 />
                 <TextElement
                   name="desc"
-                  labelText="Little Desciption about you"
+                  labelText={locale.little_desc}
                   iconName="object-group"
-                  placeholderText="Description"
+                  placeholderText={locale.desc}
                   multiline={true}
                   numberOfLines={5}
                 />
                 <TextElement
                   name="facebook"
-                  labelText="Facebook Link"
+                  labelText={locale.fb_link}
                   iconName="object-group"
-                  placeholderText="Complete Facebook profile link"
+                  placeholderText={locale.fb_link_desc}
                 />
                 <TextElement
                   name="instagram"
-                  labelText="Instagram Link"
+                  labelText={locale.insta_link}
                   iconName="object-group"
-                  placeholderText="Complete Instagram profile link"
+                  placeholderText={locale.insta_link_desc}
                 />
                 <TextElement
                   name="twitter"
-                  labelText="Twitter Link"
+                  labelText={locale.twitter}
                   iconName="object-group"
-                  placeholderText="Complete Twitter profile link"
+                  placeholderText={locale.twitter_desc}
                 />
                 <TextElement
                   name="youtube"
-                  labelText="Youtube Link"
+                  labelText={locale.youtube}
                   iconName="object-group"
-                  placeholderText="Complete Youtube profile link"
+                  placeholderText={locale.youtube_desc}
                 />
 
                 <View style={styles.button}>
                   <GradientButton
                     onClick={handleSubmit}
                     Requesting={isRequesting}
-                    text="Update"
+                    text={locale.account_update}
                     gradient={["#848484", "#334249"]}
                   />
                 </View>

@@ -7,6 +7,8 @@ import { useSelector } from "react-redux";
 const About = (props) => {
   const { user } = props.userObj;
   const selectData = useSelector((state) => state.select);
+  const locale = useSelector((state) => state.translation);
+
   const valueGetter = (name) => {
     let result = selectData[name].filter((items) => items.value == user[name]);
     if (result.length) {
@@ -22,12 +24,12 @@ const About = (props) => {
         <Card elevation={10} style={styles.cardContainer}>
           <Card.Content>
             <Title style={{ fontFamily: "open-sans-bold", fontSize: 24 }}>
-              I am looking for
+            {locale.i_am_looking_for}
             </Title>
             <View style={[styles.rowClass, { marginTop: 10 }]}>
               <View style={styles.columnClass}>
                 <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                  Wish to meet
+                {locale.wish_to_meet}
                 </Subheading>
                 <Paragraph style={{ fontFamily: "open-sans" }}>
                   {valueGetter("looking")}
@@ -35,7 +37,7 @@ const About = (props) => {
               </View>
               <View style={styles.columnClass}>
                 <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                  Purpose
+                {locale.purpose}
                 </Subheading>
                 <Paragraph style={{ fontFamily: "open-sans" }}>
                   {valueGetter("purpose")}
@@ -45,7 +47,7 @@ const About = (props) => {
             <View style={styles.rowClass}>
               <View style={styles.columnSingle}>
                 <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                  Preffered Age
+                {locale.preffered_age}
                 </Subheading>
                 <Paragraph style={{ fontFamily: "open-sans" }}>
                   {valueGetter("preffered_age")}
@@ -59,7 +61,7 @@ const About = (props) => {
         <Card elevation={10} style={styles.cardContainer}>
           <Card.Content>
             <Title style={{ fontFamily: "open-sans-bold", fontSize: 24 }}>
-              About you
+            {locale.about_you}
             </Title>
             <View
               style={[
@@ -77,12 +79,12 @@ const About = (props) => {
       <Card elevation={10} style={styles.cardContainer}>
         <Card.Content>
           <Title style={{ fontFamily: "open-sans-bold", fontSize: 24 }}>
-            About Me
+          {locale.about_me}
           </Title>
           <View style={[styles.rowClass, { marginTop: 10 }]}>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Gender
+              {locale.gender}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {valueGetter("gender")}
@@ -90,7 +92,7 @@ const About = (props) => {
             </View>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Birthday
+              {locale.birthday}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {moment(user.dob).format("Do MMM YYYY")}
@@ -100,7 +102,7 @@ const About = (props) => {
           <View style={styles.rowClass}>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Country
+              {locale.country}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {user.country}
@@ -108,7 +110,7 @@ const About = (props) => {
             </View>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Occupation
+              {locale.occupation}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {valueGetter("occupation")}
@@ -118,7 +120,7 @@ const About = (props) => {
           <View style={styles.rowClass}>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Ethnicity
+              {locale.ethnicity}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {valueGetter("ethnicity")}
@@ -126,7 +128,7 @@ const About = (props) => {
             </View>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Relationship
+              {locale.relationship}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {valueGetter("marial_status")}
@@ -136,7 +138,7 @@ const About = (props) => {
           <View style={styles.rowClass}>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Height
+              {locale.height}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {valueGetter("height")}
@@ -144,7 +146,7 @@ const About = (props) => {
             </View>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Smoker
+              {locale.smoker}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {valueGetter("smoker")}
@@ -154,7 +156,7 @@ const About = (props) => {
           <View style={styles.rowClass}>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Language
+              {locale.language}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {valueGetter("language_spoken")}
@@ -162,7 +164,7 @@ const About = (props) => {
             </View>
             <View style={styles.columnClass}>
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Drinker
+              {locale.drinker}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {valueGetter("occupation")}
@@ -182,7 +184,7 @@ const About = (props) => {
               ]}
             >
               <Subheading style={{ fontFamily: "open-sans-bold" }}>
-                Education
+              {locale.education}
               </Subheading>
               <Paragraph style={{ fontFamily: "open-sans" }}>
                 {user.education}

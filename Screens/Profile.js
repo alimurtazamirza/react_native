@@ -31,6 +31,7 @@ import Animated from "react-native-reanimated";
 import { useSelector, useDispatch } from "react-redux";
 // import { apiLoadUser } from "../redux/action/User";
 import { apiLoginUser, apiLoadUser } from "../redux/action/Auth";
+import { apiChangeLanguage } from "../redux/action/Translation";
 import { apiGetSelect } from "../redux/action/Select";
 import Storage from "../redux/Storage";
 import { apiChangeAsyncData } from "../redux/action/Notification";
@@ -47,6 +48,7 @@ const Profile = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth);
   const notify = useSelector((state) => state.notify);
+  const locale = useSelector((state) => state.translation);
   const [value, setValue] = useState("About");
   const [error, setError] = useState(false);
 
@@ -77,6 +79,9 @@ const Profile = ({ route, navigation }) => {
     const response = await UserApi.dataFirst(user.user.id);
     if (response.ok) {
       dispatch(apiChangeAsyncData(response.data));
+      if(response.data.language.length){
+        dispatch(apiChangeLanguage(response.data.language));
+      }
     }
   };
 
@@ -89,7 +94,7 @@ const Profile = ({ route, navigation }) => {
     if (response.ok) {
       dispatch(apiGetSelect(response.data));
     } else {
-      console.log("Error ");
+      console.log("select api error");
     }
   };
 
@@ -112,8 +117,8 @@ const Profile = ({ route, navigation }) => {
           }}
         >
           <List.Item
-            title="Posts"
-            description="Check what other's are thinking about."
+            title={locale.posts}
+            description={locale.check_others_thinking}
             titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
             left={() => (
               <Feather
@@ -132,8 +137,8 @@ const Profile = ({ route, navigation }) => {
           }}
         >
           <List.Item
-            title="Setting"
-            description="Change you account setting."
+            title={locale.setting}
+            description={locale.change_account_settings}
             titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
             left={() => (
               <Feather
@@ -176,8 +181,8 @@ const Profile = ({ route, navigation }) => {
           }}
         >
           <List.Item
-            title="Log Out"
-            description="Log out of the application."
+            title={locale.log_out}
+            description={locale.log_out_application}
             titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
             left={() => (
               <Feather
@@ -205,10 +210,10 @@ const Profile = ({ route, navigation }) => {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontFamily: "open-sans-bold" }}>
-          Couldn't retrive the Data.
+         {locale.couldnt_retrive}
         </Text>
         <Button mode="contained" onPress={LoadUser}>
-          Retry
+        {locale.couldnt_retrive}
         </Button>
       </View>
     );
@@ -288,7 +293,7 @@ const Profile = ({ route, navigation }) => {
               <Subheading
                 style={{ fontFamily: "open-sans", paddingHorizontal: 2 }}
               >
-                {user.user.age + " years Old "}|
+                {user.user.age +" "+locale.years_old}|
                 {user.user.state + ", " + user.user.country}
               </Subheading>
             </View>
@@ -312,7 +317,7 @@ const Profile = ({ route, navigation }) => {
                       await Linking.openURL(user.user.facebook);
                     } else {
                       Alert.alert(
-                        `Don't know how to open this URL: ${user.user.facebook}`
+                        locale.dont_know_how_to+` ${user.user.facebook}`
                       );
                     }
                   }
@@ -336,7 +341,7 @@ const Profile = ({ route, navigation }) => {
                       await Linking.openURL(user.user.instagram);
                     } else {
                       Alert.alert(
-                        `Don't know how to open this URL: ${user.user.instagram}`
+                        locale.dont_know_how_to+` ${user.user.instagram}`
                       );
                     }
                   }
@@ -360,7 +365,7 @@ const Profile = ({ route, navigation }) => {
                       await Linking.openURL(user.user.twitter);
                     } else {
                       Alert.alert(
-                        `Don't know how to open this URL: ${user.user.twitter}`
+                        locale.dont_know_how_to+` ${user.user.twitter}`
                       );
                     }
                   }
@@ -384,7 +389,7 @@ const Profile = ({ route, navigation }) => {
                       await Linking.openURL(user.user.youtube);
                     } else {
                       Alert.alert(
-                        `Don't know how to open this URL: ${user.user.youtube}`
+                        locale.dont_know_how_to+` ${user.user.youtube}`
                       );
                     }
                   }
@@ -417,7 +422,8 @@ const Profile = ({ route, navigation }) => {
                 {notify.posts}
               </Title>
               <Caption style={{ fontFamily: "open-sans", fontSize: 20 }}>
-                Posts
+                {/* Posts */}
+                {locale.posts}
               </Caption>
             </View>
             <View style={{ alignItems: "center" }}>
@@ -433,7 +439,8 @@ const Profile = ({ route, navigation }) => {
                 {notify.friends}
               </Title>
               <Caption style={{ fontFamily: "open-sans", fontSize: 20 }}>
-                Friends
+                {/* Friends */}
+                {locale.friends}
               </Caption>
             </View>
             <View style={{ alignItems: "center" }}>
@@ -449,7 +456,7 @@ const Profile = ({ route, navigation }) => {
                 {notify.likes}
               </Title>
               <Caption style={{ fontFamily: "open-sans", fontSize: 20 }}>
-                Likes
+              {locale.likes}
               </Caption>
             </View>
             <View style={{ alignItems: "center" }}>

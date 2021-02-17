@@ -3,8 +3,10 @@ import { View, StyleSheet, Text } from "react-native";
 import ErrorMsg from "./ErrorMsg";
 import RNPickerSelect from "react-native-picker-select";
 import { useFormikContext } from "formik";
+import { useSelector } from "react-redux";
 
 function PickerElement({ name, labelText, pickerData, margin = 10 }) {
+  const locale = useSelector((state) => state.translation);
   const {
     errors,
     setFieldTouched,
@@ -34,7 +36,7 @@ function PickerElement({ name, labelText, pickerData, margin = 10 }) {
         <RNPickerSelect
           style={{ ...pickerSelectStyles }}
           placeholder={{
-            label: "Select an Item",
+            label: (typeof locale.select_item=="undefined")?"Select an Item":locale.select_item,
             value: "",
           }}
           value={parseInt(values[name], 10)}

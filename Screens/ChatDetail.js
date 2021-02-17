@@ -65,6 +65,12 @@ const ChatDetail = (props) => {
       receiver_id: itemId,
       user_id: auth.id,
     });
+    if (!response.ok) {
+      if(response.status == 401){
+        return alert("You are not allowed to send massages");
+      }
+      return alert(locale.something_went_wronge);
+    }
   };
 
   const onSend = useCallback((messages = []) => {

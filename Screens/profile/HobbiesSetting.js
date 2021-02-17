@@ -18,6 +18,7 @@ function HobbiesSetting({ navigation }) {
   const [upload, setUpload] = useState(false);
   const [progress, setProgress] = useState(1);
   const [isRequesting, setIsRequesting] = useState(false);
+  const locale = useSelector((state) => state.translation);
   const { user } = useSelector((state) => state.auth);
 
   const submitForm = async (data) => {
@@ -25,7 +26,7 @@ function HobbiesSetting({ navigation }) {
     const response = await UserApi.UpdateUser(data);
     setIsRequesting(false);
     if (!response.ok) {
-      alert("Something went Wronge..!!");
+      alert(locale.something_went_wronge);
       return;
     }
     setUpload(true);
@@ -75,59 +76,59 @@ function HobbiesSetting({ navigation }) {
               <>
                 <TextElement
                   name="fav_hobbies"
-                  labelText="Hobbies"
+                  labelText={locale.hobbies}
                   iconName="user-o"
                   numberOfLines={2}
-                  placeholderText="Hobbies"
+                  placeholderText={locale.hobbies}
                 />
                 <TextElement
                   name="fav_music"
-                  labelText="Favourite Music band / Artists"
+                  labelText={locale.fav_music}
                   iconName="user-o"
                   numberOfLines={2}
-                  placeholderText="Favourite Music band / Artists"
+                  placeholderText={locale.fav_music}
                 />
                 <TextElement
                   name="fav_tv"
-                  labelText="Favourite Tv Shows"
+                  labelText={locale.fav_tv}
                   iconName="user-o"
                   numberOfLines={2}
-                  placeholderText="Favourite Tv Shows"
+                  placeholderText={locale.fav_tv}
                 />
                 <TextElement
                   name="fav_books"
-                  labelText="Favourite Books"
+                  labelText={locale.fav_books}
                   iconName="user-o"
                   numberOfLines={2}
-                  placeholderText="Favourite Books"
+                  placeholderText={locale.fav_books}
                 />
                 <TextElement
                   name="fav_movies"
-                  labelText="Favourite Movies"
+                  labelText={locale.fav_movies}
                   iconName="user-o"
                   numberOfLines={2}
-                  placeholderText="Favourite Movies"
+                  placeholderText={locale.fav_movies}
                 />
                 <TextElement
                   name="fav_games"
-                  labelText="Favourite Games"
+                  labelText={locale.fav_games}
                   iconName="user-o"
                   numberOfLines={2}
-                  placeholderText="Favourite Games"
+                  placeholderText={locale.fav_games}
                 />
                 <TextElement
                   name="fav_interest"
-                  labelText="Other Interests"
+                  labelText={locale.fav_others}
                   iconName="user-o"
                   numberOfLines={2}
-                  placeholderText="Other Interests"
+                  placeholderText={locale.fav_others}
                 />
 
                 <View style={styles.button}>
                   <GradientButton
                     onClick={handleSubmit}
                     Requesting={isRequesting}
-                    text="Update"
+                    text={locale.account_update}
                     gradient={["#848484", "#334249"]}
                   />
                 </View>

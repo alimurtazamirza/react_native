@@ -108,6 +108,9 @@ const initialState = {
     { label: "Athiest", value: "Athiest" },
     { label: "Jew", value: "Jew" },
   ],
+  languages: [
+    { label: "English", value: 1 }
+  ],
 };
 
 const selectReducer = (state = initialState, action) => {

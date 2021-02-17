@@ -12,6 +12,7 @@ const initialState = {
   notifications: [],
   massages: [],
   chatMassages: 0,
+  package:true,
 };
 
 const notificationReducer = (state = initialState, action) => {

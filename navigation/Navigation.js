@@ -18,6 +18,7 @@ import Badge from "./Badge";
 import BlogDetail from "../Screens/blogs/BlogDetail";
 import BlogNotifications from "../Screens/blogs/BlogNotifications";
 import createBlogScreen from "../Screens/blogs/CreateBlog";
+import CreateSubscription from "../Screens/profile/CreateSubscription";
 import Setting from "../Screens/profile/Setting";
 import PersonalSetting from "../Screens/profile/PersonalSetting";
 import AccountSetting from "../Screens/profile/AccountSetting";
@@ -72,9 +73,10 @@ const ScreenVarTwo = ({ navigation }) => {
 };
 
 function BlogScreen({ navigation }) {
+  const locale = useSelector((state) => state.translation);
   return (
     <Stack.Navigator screenOptions={ScreenVar}>
-      <Stack.Screen name="Search" component={Search} />
+      <Stack.Screen name="Search" component={Search} options={{ title: locale.nav_search }} />
       <Stack.Screen
         name="User"
         options={{
@@ -112,9 +114,11 @@ function BlogScreen({ navigation }) {
   );
 }
 function NotificationScreen() {
+  const locale = useSelector((state) => state.translation);
+
   return (
     <Stack.Navigator screenOptions={ScreenVar}>
-      <Stack.Screen name="Notification" component={Notification} />
+      <Stack.Screen name="Notification" component={Notification} options={{ title: locale.nav_notification }}   />
       <Stack.Screen
         name="userNotify"
         options={{
@@ -141,6 +145,8 @@ function NotificationScreen() {
   );
 }
 function ProfileScreen() {
+  const locale = useSelector((state) => state.translation);
+
   return (
     <Stack.Navigator screenOptions={ScreenVar}>
       <Stack.Screen
@@ -157,7 +163,7 @@ function ProfileScreen() {
       <Stack.Screen
         name="Blog"
         component={Blog}
-        options={{ title: "Blogs", headerTitleAlign: "center" }}
+        options={{ title: locale.nav_blogs, headerTitleAlign: "center" }}
       />
       <Stack.Screen
         name="UserFriend"
@@ -173,7 +179,7 @@ function ProfileScreen() {
       <Stack.Screen
         name="createBlog"
         component={createBlogScreen}
-        options={{ title: "Create", headerTitleAlign: "center" }}
+        options={{ title: locale.nav_create_blog, headerTitleAlign: "center" }}
       />
 
       <Stack.Screen
@@ -202,7 +208,7 @@ function ProfileScreen() {
           headerShown: true,
           headerTransparent: true,
           headerTintColor: "white",
-          title: "Personal Information",
+          title: locale.nav_persconal,
         }}
         component={PersonalSetting}
       />
@@ -212,7 +218,7 @@ function ProfileScreen() {
           headerShown: true,
           headerTransparent: true,
           headerTintColor: "white",
-          title: "Account Setting",
+          title: locale.nav_account,
         }}
         component={AccountSetting}
       />
@@ -222,7 +228,7 @@ function ProfileScreen() {
           headerShown: true,
           headerTransparent: true,
           headerTintColor: "white",
-          title: "Photos Setting",
+          title: locale.nav_photos,
         }}
         component={PhotosSetting}
       />
@@ -232,7 +238,7 @@ function ProfileScreen() {
           headerShown: true,
           headerTransparent: true,
           headerTintColor: "white",
-          title: "Photos Setting",
+          title: locale.nav_password,
         }}
         component={ChangePasswordSetting}
       />
@@ -242,9 +248,14 @@ function ProfileScreen() {
           headerShown: true,
           headerTransparent: true,
           headerTintColor: "white",
-          title: "Photos Setting",
+          title: locale.nav_package,
         }}
         component={PackageSetting}
+      />
+      <Stack.Screen
+        name="CreateSubscription"
+        component={CreateSubscription}
+        options={{ title: locale.nav_create_blog, headerTitleAlign: "center" }}
       />
       <Stack.Screen
         name="HobbiesScreen"
@@ -252,7 +263,7 @@ function ProfileScreen() {
           headerShown: true,
           headerTransparent: true,
           headerTintColor: "white",
-          title: "Photos Setting",
+          title: locale.nav_hobbies,
         }}
         component={HobbiesSetting}
       />
@@ -261,16 +272,20 @@ function ProfileScreen() {
 }
 
 function RequestScreen() {
+  const locale = useSelector((state) => state.translation);
+
   return (
     <Stack.Navigator screenOptions={ScreenVar}>
-      <Stack.Screen name="Request" component={Request} />
+      <Stack.Screen name="Request" component={Request} options={{ title:locale.nav_requests}}/>
     </Stack.Navigator>
   );
 }
 function ChatScreen() {
+  const locale = useSelector((state) => state.translation);
+
   return (
     <Stack.Navigator screenOptions={ScreenVar}>
-      <Stack.Screen name="Chat" component={Chat} />
+      <Stack.Screen name="Chat" component={Chat} options={{title:locale.nav_chat}}/>
       <Stack.Screen name="ChatDetailScreen" component={ChatDetail} />
     </Stack.Navigator>
   );
@@ -280,9 +295,10 @@ function App() {
   const dispatch = useDispatch();
   const Auth = useSelector((state) => state.auth);
   const notify = useSelector((state) => state.notify);
+  const locale = useSelector((state) => state.translation);
   React.useEffect(() => {
-    const interval = setInterval(getAsync, 20000);
-    registerForPushNotifications();
+    const interval = setInterval(getAsync, 30000);
+    // registerForPushNotifications();
     // Notifications.addNotificationReceivedListener((notifications) =>
     //   navigation.navigate("Message")
     // );
@@ -318,6 +334,29 @@ function App() {
       }
     }
   };
+  if(!notify.package){
+    return  (
+      <NavigationContainer>
+      <Stack.Navigator screenOptions={ScreenVar}>
+    <Stack.Screen
+            name="ChangePackageScreen"
+            options={{
+              headerShown: true,
+              headerTransparent: true,
+              headerTintColor: "white",
+              title: locale.nav_package,
+            }}
+            component={PackageSetting}
+          />
+          <Stack.Screen
+            name="CreateSubscription"
+            component={CreateSubscription}
+            options={{ title: locale.nav_create_blog, headerTitleAlign: "center" }}
+          />
+    </Stack.Navigator>
+    </NavigationContainer>
+    );
+  }
   return (
     <NavigationContainer>
       <Tab.Navigator

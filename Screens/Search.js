@@ -26,6 +26,7 @@ import {
 } from "@expo/vector-icons";
 import KeyboardDismiss from "../components/widjets/KeyboardDismiss";
 import Colors from "../constants/Colors";
+import { setLocale } from "yup";
 
 const { width, height } = Dimensions.get("window");
 const CARD_HEIGHT = height * 0.35;
@@ -34,13 +35,15 @@ const SPACING_FOR_CARD_INSET = width * 0.2 - 10;
 
 const Search = ({ navigation }) => {
   const Authuser = useSelector((state) => state.auth);
+  const locale = useSelector((state) => state.translation);
+
   const { lat, lon } = JSON.parse(Authuser.user.latlong);
 
   const initialMapState = {
     markers,
     categories: [
       {
-        name: "Same Country",
+        name: locale.same_country,
         active: false,
         icon: (
           <MaterialCommunityIcons
@@ -64,7 +67,7 @@ const Search = ({ navigation }) => {
       //   ),
       // },
       {
-        name: "Male",
+        name: locale.male,
         active: false,
         icon: (
           <FontAwesome
@@ -76,7 +79,7 @@ const Search = ({ navigation }) => {
         ),
       },
       {
-        name: "Female",
+        name: locale.female,
         active: false,
         icon: (
           <FontAwesome
@@ -108,7 +111,7 @@ const Search = ({ navigation }) => {
     const response = await UserApi.showMapUser({ id: Authuser.user.id });
     setLoading(false);
     if (!response.ok) {
-      Alert.alert("Error!", "Something went wronge.!!", [{ text: "Okay" }]);
+      Alert.alert(locale.error, locale.something_went_wronge, [{ text: locale.okay }]);
       return;
     }
     reformData(response.data.users);
@@ -140,12 +143,12 @@ const Search = ({ navigation }) => {
     const response = await UserApi.getFilteredResults(searchObj);
     setLoading(false);
     if (!response.ok) {
-      Alert.alert("Error!", "Something went wronge.!!", [{ text: "Okay" }]);
+      Alert.alert(locale.error, locale.something_went_wronge, [{ text: locale.okay }]);
       return;
     }
     let arryData = response.data.data;
     if (!arryData.length) {
-      Alert.alert("Error!", "No Data found.!!", [{ text: "Okay" }]);
+      Alert.alert(locale.error, locale.nothing_found, [{ text: locale.okay }]);
       return;
     }
     reformData(arryData);
@@ -180,7 +183,7 @@ const Search = ({ navigation }) => {
         title: iterator.name,
         description:
           iterator.age +
-          " Years old | " +
+           locale.years_old+" | " +
           iterator.state +
           ", " +
           iterator.country,
@@ -293,7 +296,7 @@ const Search = ({ navigation }) => {
         </MapView>
         <View style={styles.searchBox}>
           <TextInput
-            placeholder="Search user name here"
+            placeholder= {locale.search_name}
             placeholderTextColor="#000"
             autoCapitalize="none"
             style={{ flex: 1, padding: 0 }}
@@ -417,7 +420,7 @@ const Search = ({ navigation }) => {
                               },
                             ]}
                           >
-                            View profile
+                            {locale.view_profile}
                           </Text>
                         </TouchableOpacity>
                       </View>

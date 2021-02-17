@@ -1,61 +1,43 @@
 import React, { useState } from "react";
-import { View, Text, Platform, StyleSheet, ScrollView } from "react-native";
+import { View, Text, Platform, StyleSheet, ScrollView,TouchableNativeFeedback } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { useSelector, useDispatch } from "react-redux";
-import { Formik } from "formik";
-import * as yup from "yup";
-
-import GradientButton from "../../components/widjets/GradientButton";
+import { Card, Title, Paragraph } from "react-native-paper";
+// import * as yup from "yup";
 import StatusBarComponent from "../../components/widjets/StatusBarComponent";
-import PickerElement from "../../components/widjets/PickerElement";
-import UploadScreen from "../../components/widjets/UploadScreen";
-import Storage from "../../redux/Storage";
-import UserApi from "../../api/User";
-import { apiUpdateUser } from "../../redux/action/Auth";
-import ErrorMsg from "../../components/widjets/ErrorMsg";
+// import Storage from "../../redux/Storage";
+import PackageList from "../../components/widjets/PackageList";
+// import { apiUpdateUser } from "../../redux/action/Auth";
 
-let validationSchema = yup.object().shape({
-  see_profile: yup.string().required().label("Profile"),
-  see_friends: yup.string().required().label("Friends"),
-  see_images: yup.string().required().label("Images"),
-});
+
 function PackageSetting({ navigation }) {
   const dispatch = useDispatch();
   const [upload, setUpload] = useState(false);
   const [progress, setProgress] = useState(1);
-  const [isRequesting, setIsRequesting] = useState(false);
+  const [packageName, setPackageName] = useState("");
   const { user } = useSelector((state) => state.auth);
+  const notify = useSelector((state) => state.notify);
+  const locale = useSelector((state) => state.translation);
 
-  const submitForm = async (data) => {
-    setIsRequesting(true);
-    const response = await UserApi.UpdateUser(data);
-    setIsRequesting(false);
-    if (!response.ok) {
-      alert("Something went Wronge..!!");
-      return;
-    }
-    setUpload(true);
-    let { result, success } = response.data;
-    if (success) {
-      dispatch(apiUpdateUser(result));
-      restoreUser(result);
-    }
-  };
+  // const submitForm = async (data) => {
+  //   setIsRequesting(true);
+  //   const response = await UserApi.UpdateUser(data);
+  //   setIsRequesting(false);
+  //   if (!response.ok) {
+  //     alert("Something went Wronge..!!");
+  //     return;
+  //   }
+  //   setUpload(true);
+  //   let { result, success } = response.data;
+  //   if (success) {
+  //     dispatch(apiUpdateUser(result));
+  //     restoreUser(result);
+  //   }
+  // };
 
-  const restoreUser = async (result) => {
-    const storageUser = await Storage.getAuthUser();
-    if (!storageUser) return;
-    let tempUser = JSON.parse(storageUser);
-    Storage.setAuthUser(JSON.stringify({ ...tempUser, user: result }));
-  };
 
   return (
     <View style={styles.container}>
-      <UploadScreen
-        onComplete={() => setUpload(false)}
-        progress={progress}
-        visible={upload}
-      />
       <StatusBarComponent theme="light" backgound="transparent" />
       <View style={styles.header}></View>
       <Animatable.View
@@ -63,78 +45,27 @@ function PackageSetting({ navigation }) {
         duration={800}
         style={styles.footer}
       >
-        <ScrollView>
-          <Formik
-            initialValues={{
-              id: user.id,
-              see_profile: user.see_profile,
-              see_friends: user.see_friends,
-              see_images: user.see_images,
-              language: user.language,
-            }}
-            onSubmit={submitForm}
-            validationSchema={validationSchema}
-          >
-            {({
-              handleChange,
-              handleSubmit,
-              errors,
-              values,
-              setFieldTouched,
-              touched,
-            }) => (
-              <>
-                <PickerElement
-                  name="see_profile"
-                  labelText="Who can see my profile"
-                  pickerData={[
-                    { label: "Everyone", value: 1 },
-                    { label: "No one", value: 2 },
-                    { label: "Only Friends", value: 3 },
-                    { label: "Subscribed Members", value: 4 },
-                  ]}
-                />
-                <PickerElement
-                  name="see_friends"
-                  labelText="Who can see my Friends"
-                  pickerData={[
-                    { label: "Everyone", value: 1 },
-                    { label: "No one", value: 2 },
-                    { label: "Only Friends", value: 3 },
-                    { label: "Subscribed Members", value: 4 },
-                  ]}
-                />
-                <PickerElement
-                  name="see_images"
-                  labelText="Who can see my Images"
-                  pickerData={[
-                    { label: "Everyone", value: 1 },
-                    { label: "No one", value: 2 },
-                    { label: "Only Friends", value: 3 },
-                    { label: "Subscribed Members", value: 4 },
-                  ]}
-                />
-                <PickerElement
-                  name="language"
-                  labelText="Language"
-                  pickerData={[
-                    { label: "English", value: 1 },
-                    { label: "German", value: 2 },
-                    { label: "Franch", value: 3 },
-                    { label: "Pakistani", value: 4 },
-                  ]}
-                />
-                <View style={styles.button}>
-                  <GradientButton
-                    onClick={handleSubmit}
-                    Requesting={isRequesting}
-                    text="Update"
-                    gradient={["#848484", "#334249"]}
-                  />
-                </View>
-              </>
-            )}
-          </Formik>
+        <ScrollView style={{ paddingHorizontal: 20, paddingTop: 30, paddingBottom:80}}>
+        <View>
+          <Card elevation={40} style={styles.cardContainer}>
+            <Card.Content>
+              <Title style={{ fontFamily: "open-sans-bold", fontSize: 24,textAlign:"center",color:"#e74c3c" }}>
+                Subscribed Plan 
+              </Title>
+              <Title style={{ fontFamily: "open-sans-bold", fontSize: 22,textAlign:"center",color:"#334249" }}>
+              {notify.package ? user.package==null?locale.no_package_sub:user.package:""}
+              {!notify.package && <Text>{locale.register_application}</Text>}
+              </Title>
+            </Card.Content>
+          </Card>
+        </View>
+        <View style={[styles.rowClass, { marginTop: 10,marginBottom:10 }]}>
+           <Paragraph>{locale.change_plan_text}</Paragraph>
+        </View>
+        {/* loop starts */}
+        <View style={{marginBottom:200}}>
+          <PackageList navigate={navigation} />
+        </View>
         </ScrollView>
       </Animatable.View>
     </View>
@@ -156,13 +87,45 @@ const styles = StyleSheet.create({
     color: "#FF0000",
     fontSize: 14,
   },
+  rowClass: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 15,
+  },
+  cardContainer: {
+    borderRadius: 10,
+    overflow: "hidden",
+    marginBottom: 20,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.26,
+    elevation: 6,
+    borderColor:"#e74c3c",
+    borderTopWidth:2,
+    borderLeftWidth:1,
+    borderRightWidth:1,
+    borderBottomWidth:4,
+    borderRadius: 25,
+    borderWidth:2
+  },
+  columnClass: {
+    marginVertical: 0,
+    width: "55%",
+    marginLeft: 40,
+  },
+  columnSingle: {
+    flex: 1,
+    justifyContent: "flex-start",
+    marginLeft: -12,
+  },
   footer: {
     flex: Platform.OS === "ios" ? 9 : 9,
     backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    paddingHorizontal: 20,
-    paddingVertical: 30,
     borderWidth: 1,
     borderTopWidth: 7,
     borderLeftColor: "#e74c3c",

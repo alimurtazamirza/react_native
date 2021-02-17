@@ -36,6 +36,8 @@ const BlogNotifications = (props) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const { user, profileImages } = useSelector((state) => state.auth);
+  const locale = useSelector((state) => state.translation);
+
 
   const [blog, setBlog] = useState(null);
 
@@ -177,10 +179,10 @@ const BlogNotifications = (props) => {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontFamily: "open-sans-bold" }}>
-          Couldn't retrive the Data.
+          {locale.couldnt_retrive}
         </Text>
         <Button mode="contained" onPress={getBlogSingle}>
-          Retry
+          {locale.retry}
         </Button>
       </View>
     );
@@ -318,14 +320,14 @@ const BlogNotifications = (props) => {
               <Subheading
                 style={{ fontFamily: "open-sans-bold", color: "white" }}
               >
-                Comments
+                {locale.comments}
               </Subheading>
             </View>
           </View>
           <View style={{ marginVertical: 20 }}>{renderItem()}</View>
           <View style={styles.action}>
             <TextInput
-              placeholder="Write a Comment"
+              placeholder={locale.write_comment}
               style={styles.textInput}
               autoCapitalize="none"
               value={text}

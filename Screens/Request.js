@@ -12,6 +12,7 @@ import Colors from "../constants/Colors";
 const Request = ({ navigation }) => {
   const notify = useSelector((state) => state.notify);
   const auth = useSelector((state) => state.auth.user);
+  const locale = useSelector((state) => state.translation);
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const DATA = notify.requests;
@@ -43,7 +44,7 @@ const Request = ({ navigation }) => {
             paddingVertical: 15,
           }}
         >
-          Friend Requests
+          {locale.friend_reqs}
         </Text>
         <Text
           style={{
@@ -68,7 +69,7 @@ const Request = ({ navigation }) => {
           >
             <Feather name="frown" size={80} color={Colors.accent} />
             <Text style={{ color: Colors.accent, fontSize: 30 }}>
-              Nothing Found..!!
+            {locale.nothing_found}
             </Text>
           </View>
         ) : (

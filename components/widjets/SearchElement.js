@@ -5,6 +5,7 @@ import { IconButton } from "react-native-paper";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 import { useFormikContext } from "formik";
 import Colors from "../../constants/Colors";
+import { useSelector } from "react-redux";
 import UserApi from "../../api/User";
 import * as Animatable from "react-native-animatable";
 import { TouchableNativeFeedback } from "react-native-gesture-handler";
@@ -28,6 +29,8 @@ function SearchElement({
   } = useFormikContext();
   const [result, setResult] = useState(null);
   const [requesting, setRequesting] = useState(false);
+  const locale = useSelector((state) => state.translation);
+
 
   const getReverseLocation = async (lat, lon) => {
     const response = await UserApi.searchReverseGeolocation(lat, lon);
@@ -56,11 +59,11 @@ function SearchElement({
     setRequesting(true);
     const response = await UserApi.searchPlaces(search);
     if (!response.ok) {
-      alert("Something went Wronge..!!");
+      alert(locale.something_went_wronge);
       setRequesting(false);
       return;
     }
-    if (response.data.length < 1) alert("No Result Found..!");
+    if (response.data.length < 1) alert(locale.nothing_found);
     setResult(response.data);
     setRequesting(false);
   };

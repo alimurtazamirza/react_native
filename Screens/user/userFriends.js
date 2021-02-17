@@ -16,6 +16,7 @@ const CARD_WIDTH = width * 0.91;
 
 const Friends = (props) => {
   const AuthUser = useSelector((state) => state.auth.user);
+  const locale = useSelector((state) => state.translation);
   const user = props.userObj;
 
   return (
@@ -38,10 +39,10 @@ const Friends = (props) => {
                   </View>
                   <View style={styles.descriptStyle}>
                     <Text numberOfLines={2} style={styles.cardDescription}>
-                      {friend.age + " years Old"}
+                      {friend.age + " "+locale.years_old}
                     </Text>
                     <Text numberOfLines={2} style={styles.cardDescription}>
-                      {" | from " + friend.state == ""
+                      {" | "+locale.from + friend.state == ""
                         ? friend.city
                         : friend.state}
                     </Text>
@@ -81,7 +82,7 @@ const Friends = (props) => {
                             },
                           ]}
                         >
-                          View profile
+                          {locale.view_profile}
                         </Text>
                       </TouchableOpacity>
                     </View>

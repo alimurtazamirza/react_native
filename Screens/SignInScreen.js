@@ -21,6 +21,7 @@ import OutlinedButton from "../components/widjets/OutlinedButton";
 import StatusBarComponent from "../components/widjets/StatusBarComponent";
 import { useDispatch } from "react-redux";
 import { apiLoginUser } from "../redux/action/Auth";
+import { apiChangeLanguage } from "../redux/action/Translation";
 import Storage from "../redux/Storage";
 
 let validationSchema = yup.object().shape({
@@ -52,7 +53,9 @@ const SignInScreen = ({ navigation }) => {
       token: response.data.token,
     };
     dispatch(apiLoginUser(UserResponse));
+    dispatch(apiChangeLanguage(response.data.language));
     Storage.setAuthUser(JSON.stringify(UserResponse));
+    // Storage.setLocale(JSON.stringify(response.data.language));
   };
 
   return (

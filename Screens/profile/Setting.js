@@ -26,7 +26,8 @@ const BlogDetail = (props) => {
   const dispatch = useDispatch();
   const [upload, setUpload] = useState(false);
   const [progress, setProgress] = useState(0);
-  const { profileImages, user } = useSelector((state) => state.auth);
+  const { profileImages, user } = useSelector((state) => state.auth);  
+  const locale = useSelector((state) => state.translation);
 
   useEffect(() => {
     const parent = props.navigation.dangerouslyGetParent();
@@ -42,7 +43,7 @@ const BlogDetail = (props) => {
 
   const requestPermission = async () => {
     const { granted } = await ImagePicker.requestCameraRollPermissionsAsync();
-    if (!granted) alert("You need to enable permission to access the Gallery");
+    if (!granted) alert(locale.permisson_gallery);
   };
 
   const onchangeImage = async (type, uri) => {
@@ -57,7 +58,7 @@ const BlogDetail = (props) => {
     // console.log(response.data.profile_images);
     if (!response.ok) {
       setUpload(false);
-      return alert("Something Went Wronge.!!");
+      return alert(locale.something_went_wronge);
     }
     dispatch(apiProfileChange(response.data.profile_images));
     restoreUser(response.data.profile_images);
@@ -78,7 +79,7 @@ const BlogDetail = (props) => {
       });
       if (!result.cancelled) onchangeImage(type, result.uri);
     } catch (error) {
-      console.log("Error reading an image", error);
+      console.log(locale.error_image, error);
     }
   };
 
@@ -156,7 +157,7 @@ const BlogDetail = (props) => {
           <View>
             <List.Section>
               <List.Item
-                title="Personal Information"
+                title={locale.personal_setting}
                 onPress={() => {
                   props.navigation.navigate("PersonalScreen");
                 }}
@@ -183,8 +184,8 @@ const BlogDetail = (props) => {
                 )}
               />
               {/* <Divider style={{height:1,marginHorizontal:20}}/> */}
-              {/* <List.Item
-                title="Account Setting"
+               <List.Item
+                title={locale.account_setting}
                 onPress={() => {
                   props.navigation.navigate("AccountScreen");
                 }}
@@ -209,9 +210,9 @@ const BlogDetail = (props) => {
                     style={{ marginHorizontal: 10, marginTop: 15 }}
                   />
                 )}
-              /> */}
+              /> 
               <List.Item
-                title="Change Password"
+                title={locale.change_pass}
                 onPress={() => {
                   props.navigation.navigate("ChangePasswordScreen");
                 }}
@@ -238,7 +239,7 @@ const BlogDetail = (props) => {
                 )}
               />
               <List.Item
-                title="Hobbies and Interests"
+                title={locale.hobbies_setting}
                 onPress={() => {
                   props.navigation.navigate("HobbiesScreen");
                 }}
@@ -265,7 +266,7 @@ const BlogDetail = (props) => {
                 )}
               />
               <List.Item
-                title="Photos"
+                title={locale.photos_setting}
                 onPress={() => {
                   props.navigation.navigate("PhotosScreen");
                 }}
@@ -292,7 +293,7 @@ const BlogDetail = (props) => {
                 )}
               />
               <List.Item
-                title="Packages"
+                title={locale.package_setting}
                 onPress={() => {
                   props.navigation.navigate("ChangePackageScreen");
                 }}

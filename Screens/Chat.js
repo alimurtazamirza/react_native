@@ -23,6 +23,7 @@ const Chat = (props) => {
   const isFocused = useIsFocused();
   const notify = useSelector((state) => state.notify);
   const auth = useSelector((state) => state.auth.user);
+  const locale = useSelector((state) => state.translation);
   const onChangeSearch = (query) => {
     setSearchQuery(query);
     filterLists();
@@ -52,7 +53,7 @@ const Chat = (props) => {
       <View style={styles.container}>
         <View>
           <Searchbar
-            placeholder="Search"
+            placeholder={locale.Search}
             onChangeText={onChangeSearch}
             value={searchQuery}
             style={{ marginTop: 5 }}
@@ -67,7 +68,7 @@ const Chat = (props) => {
             >
               <Feather name="frown" size={80} color={Colors.accent} />
               <Text style={{ color: Colors.accent, fontSize: 30 }}>
-                Nothing Found..!!
+                {locale.nothing_found}
               </Text>
             </View>
           ) : (

@@ -20,6 +20,8 @@ import moment from "moment";
 const Posts = (props) => {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blog);
+  const locale = useSelector((state) => state.translation);
+  
   const { user } = props.userObj;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -51,9 +53,9 @@ const Posts = (props) => {
   };
 
   const handlePostDelete = (id) => {
-    Alert.alert("Delete", "Are you sure you want to delete the post?", [
-      { text: "Yes", onPress: () => deletePost(id) },
-      { text: "No" },
+    Alert.alert(locale.Post_delete, locale.Post_delete_text, [
+      { text: locale.yes, onPress: () => deletePost(id) },
+      { text: locale.no },
     ]);
   };
 
@@ -139,7 +141,7 @@ const Posts = (props) => {
       <Card.Content style={{ paddingLeft: 5 }}>
         <Title style={{ fontFamily: "open-sans-bold" }}>{item.title}</Title>
         <Subheading style={{ fontFamily: "open-sans" }}>
-          {"By " + item.name.split(" ", 1) + " "}|
+          {locale.by+" "+ item.name.split(" ", 1) + " "}|
           {moment(item.created_at).format("DD MMM, YYYY")}|
           {"" + item.category + ""}
         </Subheading>
@@ -161,7 +163,7 @@ const Posts = (props) => {
               fontFamily: "open-sans-bold",
             }}
           >
-            Read more {`>>`}
+            {locale.read_more} {`>>`}
           </Button>
         </View>
       </Card.Content>
@@ -177,7 +179,7 @@ const Posts = (props) => {
           paddingVertical: 15,
         }}
       >
-        {props.userObj ? "User Posts" : "Your Posts"}
+        {props.userObj ? locale.user_posts : locale.your_posts}
       </Subheading>
     </View>
   );
@@ -186,10 +188,10 @@ const Posts = (props) => {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontFamily: "open-sans-bold" }}>
-          Couldn't retrive the Data.
+          {locale.couldnt_retrive}
         </Text>
         <Button mode="contained" onPress={LoadBlogs}>
-          Retry
+          {locale.retry}
         </Button>
       </View>
     );

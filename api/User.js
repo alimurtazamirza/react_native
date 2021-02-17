@@ -13,6 +13,10 @@ const getUserFrineds = (id) => Server.get(`/user/user_friend/${id}`);
 
 const showMapUser = (data) => Server.post(`/get_users_for_map`, data);
 
+const getLanguage = (data) => Server.get(`/language/${language}`);
+
+// const showMapUser = (data) => Server.post(`/get_users_for_map`, data);
+
 const registerUser = (formData) => Server.post(`/register`, formData);
 
 const getFilteredResults = (data) => Server.post(`/get_filtered_results`, data);
@@ -25,6 +29,8 @@ const loginUser = (formData) => Server.post(`sanctum/token`, formData);
 const loadSelect = () => Server.get(`get_select_value`);
 
 const dataFirst = (id) => Server.get(`/user/dataFirst/${id}`);
+
+const getPackages = (type) => Server.get(`/user/packages/${type}`);
 
 const screenFocused = (option, user_id) =>
   Server.get(`/user/focused/${option}/${user_id}`);
@@ -66,7 +72,9 @@ export default {
   rejectRequest,
   screenFocused,
   loginUser,
+  getPackages,
   UpdateUser,
+  getLanguage,
   changePassword,
   loadSelect,
   checkAsyncData,

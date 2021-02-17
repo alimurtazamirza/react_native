@@ -12,7 +12,9 @@ import UploadScreen from "../../components/widjets/UploadScreen";
 import Storage from "../../redux/Storage";
 import UserApi from "../../api/User";
 import { apiUpdateUser } from "../../redux/action/Auth";
-import ErrorMsg from "../../components/widjets/ErrorMsg";
+// import ErrorMsg from "../../components/widjets/ErrorMsg";
+import { apiChangeLanguage } from "../../redux/action/Translation";
+
 
 let validationSchema = yup.object().shape({
   see_profile: yup.string().required().label("Profile"),
@@ -25,20 +27,27 @@ function PersonalSetting({ navigation }) {
   const [progress, setProgress] = useState(1);
   const [isRequesting, setIsRequesting] = useState(false);
   const { user } = useSelector((state) => state.auth);
+  const selectData = useSelector((state) => state.select);
+  const locale = useSelector((state) => state.translation);
+
 
   const submitForm = async (data) => {
     setIsRequesting(true);
     const response = await UserApi.UpdateUser(data);
     setIsRequesting(false);
     if (!response.ok) {
-      alert("Something went Wronge..!!");
+      alert(locale.error_somthing_went_wronge);
       return;
     }
     setUpload(true);
-    let { result, success } = response.data;
+    let { result, success, language } = response.data;
     if (success) {
       dispatch(apiUpdateUser(result));
       restoreUser(result);
+      if(language.length){
+        dispatch(apiChangeLanguage(language));
+        // restoreLocale(language);
+      }
     }
   };
 
@@ -48,6 +57,20 @@ function PersonalSetting({ navigation }) {
     let tempUser = JSON.parse(storageUser);
     Storage.setAuthUser(JSON.stringify({ ...tempUser, user: result }));
   };
+
+  // const restoreLocale = async (language) => {
+  //   const storageLocale = await Storage.getLocale();
+  //   if (!storageLocale) return;
+  //   let tempLocale = JSON.parse(storageLocale);
+  //   let changeObj = {};
+  //     for (const iterator of language) {
+  //       let key = iterator.key;
+  //       changeObj[key] = iterator.value;
+  //     }
+  //     // if(Object.keys(changeObj).length !== 0){
+  //     //   Storage.setAuthUser(JSON.stringify({ ...tempLocale, changeObj }));
+  //     // }
+  // };
 
   return (
     <View style={styles.container}>
@@ -84,51 +107,46 @@ function PersonalSetting({ navigation }) {
               touched,
             }) => (
               <>
-                <PickerElement
+                {/* <PickerElement
                   name="see_profile"
-                  labelText="Who can see my profile"
+                  labelText={locale.account_see_profile}
                   pickerData={[
-                    { label: "Everyone", value: 1 },
-                    { label: "No one", value: 2 },
-                    { label: "Only Friends", value: 3 },
-                    { label: "Subscribed Members", value: 4 },
+                    { label: locale.account_everyone, value: 1 },
+                    { label: locale.account_noone, value: 2 },
+                    { label: locale.account_only_friend, value: 3 },
+                    { label: locale.account_subscribed, value: 4 },
                   ]}
-                />
-                <PickerElement
+                /> */}
+                {/* <PickerElement
                   name="see_friends"
-                  labelText="Who can see my Friends"
+                  labelText={locale.account_friend}
                   pickerData={[
-                    { label: "Everyone", value: 1 },
-                    { label: "No one", value: 2 },
-                    { label: "Only Friends", value: 3 },
-                    { label: "Subscribed Members", value: 4 },
+                    { label: locale.account_everyone, value: 1 },
+                    { label: locale.account_noone, value: 2 },
+                    { label: locale.account_only_friend, value: 3 },
+                    { label: locale.account_subscribed, value: 4 },
                   ]}
-                />
-                <PickerElement
+                /> */}
+                {/* <PickerElement
                   name="see_images"
-                  labelText="Who can see my Images"
+                  labelText={locale.account_images}
                   pickerData={[
-                    { label: "Everyone", value: 1 },
-                    { label: "No one", value: 2 },
-                    { label: "Only Friends", value: 3 },
-                    { label: "Subscribed Members", value: 4 },
+                    { label: locale.account_everyone, value: 1 },
+                    { label: locale.account_noone, value: 2 },
+                    { label: locale.account_only_friend, value: 3 },
+                    { label: locale.account_subscribed, value: 4 },
                   ]}
-                />
+                /> */}
                 <PickerElement
                   name="language"
-                  labelText="Language"
-                  pickerData={[
-                    { label: "English", value: 1 },
-                    { label: "German", value: 2 },
-                    { label: "Franch", value: 3 },
-                    { label: "Pakistani", value: 4 },
-                  ]}
+                  labelText={locale.account_languages}
+                  pickerData={selectData.languages}
                 />
                 <View style={styles.button}>
                   <GradientButton
                     onClick={handleSubmit}
                     Requesting={isRequesting}
-                    text="Update"
+                    text={locale.account_update}
                     gradient={["#848484", "#334249"]}
                   />
                 </View>

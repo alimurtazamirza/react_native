@@ -8,6 +8,7 @@ import { apiChangeAsyncData } from "../../redux/action/Notification";
 import UserApi from "../../api/User";
 import Colors from "../../constants/Colors";
 
+
 const { width, height } = Dimensions.get("window");
 
 function RequestList(props) {
@@ -15,6 +16,8 @@ function RequestList(props) {
   const AuthUser = useSelector((state) => state.auth.user);
   const [requesting, setRequesting] = useState(false);
   const [requesting2, setRequesting2] = useState(false);
+  const locale = useSelector((state) => state.translation);
+
 
   const requestBtn = async (option) => {
     if (option == "accept") {
@@ -98,7 +101,7 @@ function RequestList(props) {
                   requestBtn("accept");
                 }}
                 Requesting={requesting}
-                text="Confirm"
+                text={locale.confirm}
                 gradient={["#ef8575", Colors.accent]}
                 height={40}
               />
@@ -109,7 +112,7 @@ function RequestList(props) {
                   requestBtn("cancel");
                 }}
                 Requesting={requesting2}
-                text="Remove"
+                text={locale.remove}
                 height={40}
               />
             </View>

@@ -19,6 +19,7 @@ const { width, height } = Dimensions.get("window");
 function PhotosSetting(props) {
   const dispatch = useDispatch();
   const { user, imageUris } = useSelector((state) => state.auth);
+  const locale = useSelector((state) => state.translation);
   const flatList = useRef();
   const [requesting, setRequesting] = useState(false);
   const [upload, setUpload] = useState(false);
@@ -39,10 +40,13 @@ function PhotosSetting(props) {
       { user_id: user.id, image: uri },
       (progress) => setProgress(progress)
     );
-
+    console.log(response);
     if (!response.ok) {
       setUpload(false);
-      return alert("Something Went Wronge.!!");
+      if(response.status == 401){
+        return alert("You are not allowed to upload the pictures");
+      }
+      return alert(locale.something_went_wronge);
     }
     dispatch(apiPhotoChange(response.data));
     // setImmageUris([...imageUris, { path: response.data.data }]);

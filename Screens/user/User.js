@@ -31,7 +31,7 @@ import BottomSheet from "reanimated-bottom-sheet";
 import Animated from "react-native-reanimated";
 import { useSelector, useDispatch } from "react-redux";
 import ImageView from "react-native-image-viewing";
-import { apiChangeFriend } from "../../redux/action/Auth";
+// import { apiChangeFriend } from "../../redux/action/Auth";
 import { apiGetSelect } from "../../redux/action/Select";
 
 import Switch from "./userSwitch";
@@ -53,6 +53,7 @@ const Profile = ({ route, navigation }) => {
   const [error, setError] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [visible, setIsVisible] = useState({ shown: false, index: 0 });
+  const locale = useSelector((state) => state.translation);
   const [user, setUser] = useState({});
 
   useEffect(() => {
@@ -172,7 +173,7 @@ const Profile = ({ route, navigation }) => {
           requestBtn("remove");
         }}
         Requesting={requesting}
-        text="Remove Friend"
+        text={locale.remove_friend}
         gradient={["#ef8575", Colors.accent]}
       />
     );
@@ -183,7 +184,7 @@ const Profile = ({ route, navigation }) => {
           requestBtn("accept");
         }}
         Requesting={requesting}
-        text="Accept Request"
+        text={locale.accept_req}
         gradient={["#ef8575", Colors.accent]}
       />
     );
@@ -194,7 +195,7 @@ const Profile = ({ route, navigation }) => {
           requestBtn("cancel");
         }}
         Requesting={requesting}
-        text="Cancel Request"
+        text={locale.cancel_req}
         gradient={["#ef8575", Colors.accent]}
       />
     );
@@ -205,7 +206,7 @@ const Profile = ({ route, navigation }) => {
           requestBtn("add");
         }}
         Requesting={requesting}
-        text="Add Friend"
+        text={locale.add_friend}
         gradient={["#ef8575", Colors.accent]}
       />
     );
@@ -224,8 +225,8 @@ const Profile = ({ route, navigation }) => {
       <List.Section>
         <TouchableOpacity>
           <List.Item
-            title="Block User"
-            description="This user won't be able to bother you."
+            title={locale.block_user}
+            description={locale.block_user_text}
             titleStyle={{ fontSize: 16, fontFamily: "open-sans-bold" }}
             left={() => (
               <Feather
@@ -253,10 +254,10 @@ const Profile = ({ route, navigation }) => {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontFamily: "open-sans-bold" }}>
-          Couldn't retrive the Data.
+          {locale.couldnt_retrive}
         </Text>
         <Button mode="contained" onPress={LoadUser}>
-          Retry
+          {locale.retry}
         </Button>
       </View>
     );
@@ -358,7 +359,7 @@ const Profile = ({ route, navigation }) => {
               <Subheading
                 style={{ fontFamily: "open-sans", paddingHorizontal: 2 }}
               >
-                {user.user.age + " years Old "}|
+                {user.user.age +" "+ locale.years_old}|
                 {user.user.state + ", " + user.user.country}
               </Subheading>
             </View>
@@ -382,7 +383,7 @@ const Profile = ({ route, navigation }) => {
                       await Linking.openURL(user.user.facebook);
                     } else {
                       Alert.alert(
-                        `Don't know how to open this URL: ${user.user.facebook}`
+                        locale.dont_know_how_to+` ${user.user.facebook}`
                       );
                     }
                   }
@@ -406,7 +407,7 @@ const Profile = ({ route, navigation }) => {
                       await Linking.openURL(user.user.instagram);
                     } else {
                       Alert.alert(
-                        `Don't know how to open this URL: ${user.user.instagram}`
+                        locale.dont_know_how_to+` ${user.user.instagram}`
                       );
                     }
                   }
@@ -430,7 +431,7 @@ const Profile = ({ route, navigation }) => {
                       await Linking.openURL(user.user.twitter);
                     } else {
                       Alert.alert(
-                        `Don't know how to open this URL: ${user.user.twitter}`
+                        locale.dont_know_how_to+` ${user.user.twitter}`
                       );
                     }
                   }
@@ -454,7 +455,7 @@ const Profile = ({ route, navigation }) => {
                       await Linking.openURL(user.user.youtube);
                     } else {
                       Alert.alert(
-                        `Don't know how to open this URL: ${user.user.youtube}`
+                        locale.dont_know_how_to+` ${user.user.youtube}`
                       );
                     }
                   }
@@ -487,7 +488,7 @@ const Profile = ({ route, navigation }) => {
                 {user.posts}
               </Title>
               <Caption style={{ fontFamily: "open-sans", fontSize: 20 }}>
-                Posts
+              {locale.posts}
               </Caption>
             </View>
             <View style={{ alignItems: "center" }}>
@@ -503,7 +504,7 @@ const Profile = ({ route, navigation }) => {
                 {user.friends_count}
               </Title>
               <Caption style={{ fontFamily: "open-sans", fontSize: 20 }}>
-                Friends
+              {locale.friends}
               </Caption>
             </View>
             <View style={{ alignItems: "center" }}>
@@ -519,7 +520,7 @@ const Profile = ({ route, navigation }) => {
                 {user.likes}
               </Title>
               <Caption style={{ fontFamily: "open-sans", fontSize: 20 }}>
-                Likes
+              {locale.likes}
               </Caption>
             </View>
             {/* <View style={{ alignItems: "center" }}>
@@ -577,7 +578,7 @@ const Profile = ({ route, navigation }) => {
                     },
                   ]}
                 >
-                  Message
+                  {locale.message}
                 </Text>
               </TouchableOpacity>
             </View>

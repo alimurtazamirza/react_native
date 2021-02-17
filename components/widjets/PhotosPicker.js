@@ -11,23 +11,26 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
 import * as ImagePicker from "expo-image-picker";
+import { useSelector } from "react-redux";
+
 
 const { width, height } = Dimensions.get("window");
 
 function PhotosPicker({ imageUri, onchangeImage }) {
+  const locale = useSelector((state) => state.translation);
   useEffect(() => {
     requestPermission();
   }, []);
   const requestPermission = async () => {
     const { granted } = await ImagePicker.requestCameraRollPermissionsAsync();
-    if (!granted) alert("You need to enable permission to access the Gallery");
+    if (!granted) alert(locale.permisson_gallery);
   };
   const handlePress = () => {
     if (!imageUri) SelectImage();
     else
-      Alert.alert("Delete", "Are you sure you want to delete the image?", [
-        { text: "Yes", onPress: () => onchangeImage(null) },
-        { text: "No" },
+      Alert.alert(locale.Post_delete, locale.delete_image, [
+        { text: locale.yes, onPress: () => onchangeImage(null) },
+        { text: locale.no },
       ]);
   };
   const SelectImage = async () => {
@@ -38,7 +41,7 @@ function PhotosPicker({ imageUri, onchangeImage }) {
       });
       if (!result.cancelled) onchangeImage(result.uri);
     } catch (error) {
-      console.log("Error reading an image", error);
+      console.log(locale.error_image, error);
     }
   };
   return (
@@ -51,7 +54,7 @@ function PhotosPicker({ imageUri, onchangeImage }) {
               name="camera"
               size={30}
             />
-            <Text>Add Image</Text>
+            <Text>{locale.add_image}</Text>
           </>
         )}
         {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}

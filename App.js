@@ -10,9 +10,11 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import SwitchNavigation from "./navigation/SwitchNavigation";
 import UserReducer from "./redux/reducer/User";
 import AuthReducer from "./redux/reducer/Auth";
+// import packageReducer from "./redux/reducer/package";
 import SelectReducer from "./redux/reducer/Select";
 import blogReducer from "./redux/reducer/Blog";
 import notificationReducer from "./redux/reducer/Notification";
+import translationReducer from "./redux/reducer/Translation";
 import Storage from "./redux/Storage/";
 // import { navigationRef } from "./navigation/rootNavigation";
 
@@ -22,13 +24,15 @@ const rootReducer = combineReducers({
   select: SelectReducer,
   blog: blogReducer,
   notify: notificationReducer,
+  translation: translationReducer,
+  // package: packageReducer,
 });
 
 const store = createStore(rootReducer, composeWithDevTools());
-
+      
 const theme = {
   ...DefaultTheme,
-  roundness: 2,
+  roundness: 2, 
   colors: {
     ...DefaultTheme.colors,
     primary: Colors.accent,

@@ -37,6 +37,8 @@ function ChangePasswordSetting({ navigation }) {
   const [progress, setProgress] = useState(1);
   const [isRequesting, setIsRequesting] = useState(false);
   const { user } = useSelector((state) => state.auth);
+  const locale = useSelector((state) => state.translation);
+
 
   const submitForm = async (data) => {
     setIsRequesting(true);
@@ -44,7 +46,7 @@ function ChangePasswordSetting({ navigation }) {
     setIsRequesting(false);
     console.log(response);
     if (!response.ok) {
-      alert("Something went Wronge..!!");
+      alert(locale.something_went_wronge);
       return;
     }
 
@@ -94,31 +96,31 @@ function ChangePasswordSetting({ navigation }) {
               <>
                 <PasswordElement
                   name="old_password"
-                  labelText="Old Password"
+                  labelText={locale.old_pass}
                   iconName="lock"
                   icon={true}
                   margin={20}
-                  placeholderText="Your Password"
+                  placeholderText={locale.your_pass}
                   secureTextEntry={secureTextOld}
                   updateSecureTextEntry={() => setSecureTextOld(!secureTextOld)}
                 />
                 <PasswordElement
                   name="password"
-                  labelText="Password"
+                  labelText={locale.password}
                   iconName="lock"
                   icon={true}
                   margin={20}
-                  placeholderText="Your Password"
+                  placeholderText={locale.your_pass}
                   secureTextEntry={secureText}
                   updateSecureTextEntry={() => setSecureText(!secureText)}
                 />
                 <PasswordElement
                   name="password_confirmation"
-                  labelText="Confirm Password"
+                  labelText={locale.confirm_pass}
                   iconName="lock"
                   icon={true}
                   margin={20}
-                  placeholderText="Confirm Your Password"
+                  placeholderText={locale.confirm_your_pass}
                   secureTextEntry={secureTextConfirm}
                   updateSecureTextEntry={() =>
                     setSecureTextConfirm(!secureTextConfirm)
@@ -129,7 +131,7 @@ function ChangePasswordSetting({ navigation }) {
                   <GradientButton
                     onClick={handleSubmit}
                     Requesting={isRequesting}
-                    text="Update"
+                    text={locale.account_update}
                     gradient={["#848484", "#334249"]}
                   />
                 </View>
