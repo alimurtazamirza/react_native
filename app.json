@@ -17,7 +17,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.trulysuccessive.lovesetgo",
-      "buildNumber":"1.0.1"
+      "buildNumber":"1.0.1",
+      "config": {
+        "googleMapsApiKey": "AIzaSyA0CpX18GsaRdCNi1G6iRMUGtaRk86LRFA"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -26,7 +29,7 @@
       "package": "com.truelysuccessfull.lovesetgo",
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyBNW8adc0A133iE_Al7Sr_RGgeJLaldMjI"
+          "apiKey": "AIzaSyBVMGiY12I33QAvoKlnnKWvrlxxSfF9IgE"
         }
       },
       "useNextNotificationsApi": true
