@@ -2,7 +2,7 @@
   "expo": {
     "name": "LoveSetGo",
     "slug": "love_set_go",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.trulysuccessive.lovesetgo",
-      "buildNumber":"1.0.1",
+      "buildNumber":"1.0.2",
       "config": {
         "googleMapsApiKey": "AIzaSyA0CpX18GsaRdCNi1G6iRMUGtaRk86LRFA"
       }
